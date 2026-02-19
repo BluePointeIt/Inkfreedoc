@@ -1,0 +1,80 @@
+<div class="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4 md:p-8">
+  <div class="bg-white rounded-lg shadow-lg max-w-3xl w-full">
+    <!-- Header -->
+    <div class="border-b border-gray-200 p-6 text-center">
+      <h1 class="text-2xl font-bold text-gray-900">In-Person Signing</h1>
+      <p class="text-gray-500 mt-1">
+        Signer <%= @current_index %> of <%= @total_signers %>
+      </p>
+      <div class="flex justify-center mt-3 gap-1">
+        <% @total_signers.times do |i| %>
+          <div class="w-8 h-2 rounded-full <%= i < @current_index ? 'bg-green-500' : 'bg-gray-200' %>"></div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Current Signer Info -->
+    <div class="p-6">
+      <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+            <span class="text-blue-700 font-bold"><%= @current_index %></span>
+          </div>
+          <div>
+            <p class="font-semibold text-blue-900">
+              <%= @current_submitter.role_label || "Signer #{@current_index}" %>
+            </p>
+            <p class="text-sm text-blue-700">
+              <%= @current_submitter.name || @current_submitter.email %>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Consent Notice -->
+      <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+        <p class="text-sm text-amber-800">
+          <strong>Notice:</strong> By proceeding, you consent to signing this document electronically.
+          Your IP address, device information, and approximate location will be recorded
+          as part of the legally required audit trail.
+        </p>
+      </div>
+
+      <!-- Embedded signing form -->
+      <div class="border border-gray-200 rounded-lg overflow-hidden">
+        <iframe
+          src="<%= submit_form_path(@current_submitter.slug) %>?kiosk=true"
+          class="w-full"
+          style="height: 70vh; min-height: 500px;"
+          frameborder="0"
+          allow="geolocation"
+        ></iframe>
+      </div>
+
+      <!-- Navigation -->
+      <div class="mt-6 flex justify-between items-center">
+        <p class="text-xs text-gray-400">
+          Session expires at
+          <%= @signing_session.expires_at.strftime('%I:%M %p %Z') %>
+        </p>
+        <% if @current_submitter.completed_at? %>
+          <%= link_to kiosk_advance_path(token: @signing_session.session_token),
+                      method: :post,
+                      class: "btn btn-primary" do %>
+            Next Signer &rarr;
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Listen for completion message from the signing iframe
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'submitter:complete') {
+      // Reload to show the "Next Signer" button
+      window.location.reload();
+    }
+  });
+</script>

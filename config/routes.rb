@@ -14,6 +14,23 @@ Rails.application.routes.draw do
   get 'up' => 'rails/health#show'
   get 'manifest' => 'pwa#manifest'
 
+  # Signing Analytics Dashboard
+  resources :signing_analytics, only: [:index] do
+    collection do
+      get :flagged
+      get :export
+    end
+    member do
+      get :audit_trail
+    end
+  end
+
+  # In-Person / Kiosk Signing Sessions
+  resources :in_person_sessions, only: [:create]
+  get  '/sign/kiosk/:token', to: 'in_person_sessions#show', as: :kiosk_sign
+  post '/sign/kiosk/:token/advance', to: 'in_person_sessions#advance', as: :kiosk_advance
+  post '/sign/kiosk/:token/complete', to: 'in_person_sessions#complete_signer', as: :kiosk_complete
+
   devise_for :users, path: '/', only: %i[sessions passwords],
                      controllers: { sessions: 'sessions', passwords: 'passwords' }
 
@@ -31,6 +48,8 @@ Rails.application.routes.draw do
     resources :submitters, only: %i[index show update]
     resources :submissions, only: %i[index show create destroy] do
       resources :documents, only: %i[index], controller: 'submission_documents'
+      resource :audit_trail, only: %i[show], controller: 'submission_audit_trails'
+      resource :verify_integrity, only: %i[show], controller: 'submission_integrity'
       collection do
         resources :init, only: %i[create], controller: 'submissions'
         resources :emails, only: %i[create], controller: 'submissions', as: :submissions_emails

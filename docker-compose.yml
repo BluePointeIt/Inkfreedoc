@@ -8,6 +8,7 @@ services:
       - 3000:3000
     volumes:
       - ./docuseal:/data/docuseal
+      - ./geoip:/app/db/geoip:ro
     environment:
       - FORCE_SSL=${HOST}
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/docuseal

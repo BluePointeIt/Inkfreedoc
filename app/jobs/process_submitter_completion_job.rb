@@ -24,6 +24,9 @@ class ProcessSubmitterCompletionJob
 
     create_completed_documents!(submitter)
 
+    # Record document hashes for audit integrity chain
+    record_document_hashes!(submitter, is_all_completed)
+
     if !is_all_completed && submitter.submission.submitters_order_preserved? && params['send_invitation_email'] != false
       enqueue_next_submitter_request_notification(submitter)
     end
@@ -155,6 +158,42 @@ class ProcessSubmitterCompletionJob
                     .find_by(key: AccountConfig::BCC_EMAILS)&.value
 
     bcc.to_s.scan(User::EMAIL_REGEXP)
+  end
+
+  def record_document_hashes!(submitter, is_all_completed)
+    submitter.documents.each do |attachment|
+      next if attachment.metadata['sha256'].blank?
+
+      AuditHashService.record_document_hash(
+        submission: submitter.submission,
+        submitter:,
+        event_type: 'signed',
+        file_hash: attachment.metadata['sha256']
+      )
+    end
+
+    return unless is_all_completed
+
+    # Record final combined/audit trail hashes
+    submission = submitter.submission
+
+    if submission.audit_trail.attached?
+      AuditHashService.record_document_hash(
+        submission:,
+        event_type: 'audit_trail_generated',
+        file_hash: submission.audit_trail.blob.checksum
+      )
+    end
+
+    if submission.combined_document.attached?
+      AuditHashService.record_document_hash(
+        submission:,
+        event_type: 'completed',
+        file_hash: submission.combined_document.blob.checksum
+      )
+    end
+  rescue StandardError => e
+    Rails.logger.error("Failed to record document hashes: #{e.message}")
   end
 
   def enqueue_next_submitter_request_notification(submitter)

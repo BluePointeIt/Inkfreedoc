@@ -1,0 +1,131 @@
+<div class="mx-auto max-w-7xl px-4 py-6">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">Signing Analytics</h1>
+    <div class="flex gap-2">
+      <% if @flagged_count > 0 %>
+        <%= link_to flagged_signing_analytics_path, class: "btn btn-warning btn-sm gap-2" do %>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+          </svg>
+          <%= @flagged_count %> Flagged
+        <% end %>
+      <% end %>
+      <%= link_to export_signing_analytics_path(format: :csv), class: "btn btn-outline btn-sm" do %>
+        Export CSV
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+    <div class="stat bg-base-100 rounded-lg shadow p-4">
+      <div class="stat-title text-xs">Total Submissions</div>
+      <div class="stat-value text-2xl"><%= @stats[:total_submissions] %></div>
+    </div>
+    <div class="stat bg-base-100 rounded-lg shadow p-4">
+      <div class="stat-title text-xs">Completed Today</div>
+      <div class="stat-value text-2xl"><%= @stats[:completed_today] %></div>
+    </div>
+    <div class="stat bg-base-100 rounded-lg shadow p-4">
+      <div class="stat-title text-xs">Remote Signings</div>
+      <div class="stat-value text-2xl"><%= @stats[:remote_signings] %></div>
+    </div>
+    <div class="stat bg-base-100 rounded-lg shadow p-4">
+      <div class="stat-title text-xs">In-Person</div>
+      <div class="stat-value text-2xl"><%= @stats[:in_person_signings] %></div>
+    </div>
+    <div class="stat bg-base-100 rounded-lg shadow p-4">
+      <div class="stat-title text-xs">Same Network</div>
+      <div class="stat-value text-2xl"><%= @stats[:same_network] %></div>
+    </div>
+    <div class="stat bg-base-100 rounded-lg shadow p-4">
+      <div class="stat-title text-xs">Same Device</div>
+      <div class="stat-value text-2xl"><%= @stats[:same_device] %></div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <!-- Device Breakdown -->
+    <div class="bg-base-100 rounded-lg shadow p-6">
+      <h2 class="text-lg font-semibold mb-4">Device Types</h2>
+      <% @device_breakdown.each do |device, count| %>
+        <div class="flex justify-between items-center py-2 border-b border-base-200 last:border-0">
+          <span class="capitalize"><%= device || 'Unknown' %></span>
+          <span class="badge badge-ghost"><%= count %></span>
+        </div>
+      <% end %>
+      <% if @device_breakdown.empty? %>
+        <p class="text-gray-400 text-sm">No signing data yet</p>
+      <% end %>
+    </div>
+
+    <!-- Top Countries -->
+    <div class="bg-base-100 rounded-lg shadow p-6">
+      <h2 class="text-lg font-semibold mb-4">Top Countries</h2>
+      <% @country_breakdown.each do |country, count| %>
+        <div class="flex justify-between items-center py-2 border-b border-base-200 last:border-0">
+          <span><%= country %></span>
+          <span class="badge badge-ghost"><%= count %></span>
+        </div>
+      <% end %>
+      <% if @country_breakdown.empty? %>
+        <p class="text-gray-400 text-sm">No location data yet</p>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Recent Signings Table -->
+  <div class="bg-base-100 rounded-lg shadow">
+    <div class="p-6 border-b border-base-200">
+      <h2 class="text-lg font-semibold">Recent Signings</h2>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="table table-sm">
+        <thead>
+          <tr>
+            <th>Signer</th>
+            <th>Role</th>
+            <th>Signed At</th>
+            <th>IP</th>
+            <th>Device</th>
+            <th>Location</th>
+            <th>Mode</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @recent_signings.each do |loc| %>
+            <tr>
+              <td>
+                <%= link_to loc.submitter.email || loc.submitter.name,
+                    submission_path(loc.submitter.submission),
+                    class: "link link-primary text-sm" %>
+              </td>
+              <td class="text-sm"><%= loc.submitter.role_label || 'Signer' %></td>
+              <td class="text-sm whitespace-nowrap"><%= loc.signed_at_utc&.strftime('%Y-%m-%d %H:%M UTC') %></td>
+              <td class="font-mono text-xs"><%= loc.ip_address %></td>
+              <td class="text-sm capitalize"><%= loc.device_type %> / <%= loc.browser_name %></td>
+              <td class="text-sm">
+                <%= [loc.city, loc.state_region, loc.country_code].compact.join(', ') %>
+              </td>
+              <td>
+                <% badge_class = case loc.signing_mode
+                                 when 'remote' then 'badge-info'
+                                 when 'in_person' then 'badge-success'
+                                 when 'same_network' then 'badge-warning'
+                                 when 'same_device_session' then 'badge-error'
+                                 else 'badge-ghost'
+                                 end %>
+                <span class="badge badge-sm <%= badge_class %>"><%= loc.signing_mode.humanize %></span>
+              </td>
+            </tr>
+          <% end %>
+          <% if @recent_signings.empty? %>
+            <tr>
+              <td colspan="7" class="text-center text-gray-400 py-8">No signing data yet</td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -239,6 +239,44 @@ module Submissions
         composer.draw_box(divider)
       end
 
+      # Document Integrity / Hash Chain section
+      hash_chain = submission.document_hashes.order(computed_at: :asc)
+
+      if hash_chain.any?
+        composer.text('Document Integrity', font_size: 12, padding: [0, 0, 10, 0])
+
+        chain_verification = AuditHashService.verify_chain(submission)
+
+        integrity_rows = [
+          [
+            composer.document.layout.formatted_text_box(
+              [{ text: 'Hash Algorithm: ', font: [FONT_NAME, { variant: :bold }] }, "SHA-256\n",
+               { text: 'Hash Chain Valid: ', font: [FONT_NAME, { variant: :bold }] },
+               chain_verification[:valid] ? "Yes\n" : "INVALID\n",
+               { text: 'Events Verified: ', font: [FONT_NAME, { variant: :bold }] },
+               "#{chain_verification[:events_verified] || 0}\n"],
+              line_spacing: 1.3
+            )
+          ]
+        ]
+
+        hash_chain.each do |dh|
+          integrity_rows << [
+            composer.document.layout.formatted_text_box(
+              [{ text: "#{dh.event_type&.humanize || 'Hash'}: ", font: [FONT_NAME, { variant: :bold }] },
+               "#{dh.document_hash[0..15]}...#{dh.document_hash[-8..]}\n",
+               { text: 'Computed: ', font: [FONT_NAME, { variant: :bold }] },
+               "#{I18n.l(dh.computed_at.in_time_zone(timezone), format: :long, locale: account.locale)} " \
+               "#{TimeUtils.timezone_abbr(timezone, dh.computed_at)}\n"],
+              line_spacing: 1.3
+            )
+          ]
+        end
+
+        composer.table(integrity_rows, cell_style: { padding: [0, 0, 8, 0], border: { width: 0 } })
+        composer.draw_box(divider)
+      end
+
       submission.template_submitters.filter_map do |item|
         submitter = submission.submitters.find { |e| e.uuid == item['uuid'] }
 
@@ -272,11 +310,33 @@ module Submissions
             e['type'] == 'kba' && e['submitter_uuid'] == submitter.uuid && submitter.values[e['uuid']].present?
           end
 
+        # Fetch enhanced signing location data
+        signing_location = submitter.signing_locations.order(signed_at_utc: :desc).first
+
+        location_text = if signing_location
+                          [signing_location.city, signing_location.state_region,
+                           signing_location.country].compact.join(', ')
+                        end
+
+        device_text = if signing_location
+                        [signing_location.device_type&.capitalize,
+                         signing_location.browser_name,
+                         signing_location.browser_version].compact.join(' / ')
+                      end
+
+        os_text = if signing_location
+                    [signing_location.operating_system,
+                     signing_location.os_version].compact.join(' ')
+                  end
+
+        signing_mode_text = signing_location&.signing_mode&.humanize
+
         info_rows = [
           [
             composer.document.layout.formatted_text_box(
               [
                 submission.template_submitters.size > 1 && { text: "#{item['name']}\n" },
+                submitter.role_label && { text: "#{submitter.role_label}\n" },
                 submitter.email && { text: "#{submitter.email}\n", font: [FONT_NAME, { variant: :bold }] },
                 submitter.name && { text: "#{TextUtils.maybe_rtl_reverse(submitter.name)}\n" },
                 submitter.phone && { text: "#{submitter.phone}\n" }
@@ -302,6 +362,14 @@ module Submissions
                 completed_event.data['sid'] && { text: "#{I18n.t('session_id')}: #{completed_event.data['sid']}\n" },
                 completed_event.data['ua'] && { text: "User agent: #{completed_event.data['ua']}\n" },
                 submitter.timezone && { text: "Time zone: #{submitter.timezone.to_s.sub('Kiev', 'Kyiv')}\n" },
+                signing_mode_text && { text: "Signing mode: #{signing_mode_text}\n" },
+                device_text && { text: "Device: #{device_text}\n" },
+                os_text && { text: "OS: #{os_text}\n" },
+                location_text && { text: "Location: #{location_text}\n" },
+                signing_location&.gps_permission_granted && {
+                  text: "GPS: #{signing_location.gps_latitude}, #{signing_location.gps_longitude} " \
+                        "(accuracy: #{signing_location.gps_accuracy&.round(1)}m)\n"
+                },
                 "\n"
               ].compact_blank, line_spacing: 1.3, padding: [10, 20, 20, 0]
             )

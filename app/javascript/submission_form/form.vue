@@ -597,6 +597,7 @@ import DateStep from './date_step'
 import MarkdownContent from './markdown_content'
 import InviteForm from './invite_form'
 import FormCompleted from './completed'
+import { requestGeolocation, appendGeolocationToFormData } from './geolocation_capture'
 import { IconInnerShadowTop, IconArrowsDiagonal, IconWritingSign, IconArrowsDiagonalMinimize2 } from '@tabler/icons-vue'
 import AppearsOn from './appears_on'
 import i18n from './i18n'
@@ -1175,6 +1176,9 @@ export default {
   mounted () {
     this.submittedValues = JSON.parse(JSON.stringify(this.values))
 
+    // Request geolocation for signing metadata capture
+    requestGeolocation()
+
     screen?.orientation?.addEventListener('change', this.onOrientationChange)
 
     this.fields.forEach((field) => {
@@ -1531,6 +1535,9 @@ export default {
         if (isLastStep && !emptyRequiredField && !this.inviteSubmitters.length && !this.optionalInviteSubmitters.length) {
           formData.append('completed', 'true')
           formData.append('timezone', Intl.DateTimeFormat().resolvedOptions().timeZone)
+
+          // Append geolocation and device metadata for signing audit trail
+          appendGeolocationToFormData(formData)
         }
 
         let saveStepRequest

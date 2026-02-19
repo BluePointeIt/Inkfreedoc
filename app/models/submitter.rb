@@ -62,6 +62,8 @@ class Submitter < ApplicationRecord
 
   has_many :document_generation_events, dependent: :destroy
   has_many :submission_events, dependent: :destroy
+  has_many :signing_locations, dependent: :destroy
+  has_many :document_hashes, dependent: :nullify
   has_many :start_form_submission_events, -> { where(event_type: :start_form) },
            class_name: 'SubmissionEvent', dependent: :destroy, inverse_of: :submitter
 

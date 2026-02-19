@@ -1,0 +1,26 @@
+<div class="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-8">
+  <div class="bg-white rounded-lg shadow-lg max-w-lg w-full p-8 text-center">
+    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+      <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+      </svg>
+    </div>
+
+    <h1 class="text-2xl font-bold text-gray-900 mb-2">All Signatures Complete</h1>
+    <p class="text-gray-600 mb-6">
+      All signers have completed signing this document.
+      The signed document and certificate of completion are now available.
+    </p>
+
+    <div class="bg-gray-50 rounded-lg p-4 mb-6">
+      <p class="text-sm text-gray-500">Session ID</p>
+      <p class="font-mono text-sm text-gray-700"><%= @signing_session.session_token[0..15] %>...</p>
+      <p class="text-sm text-gray-500 mt-2">Completed at</p>
+      <p class="text-sm text-gray-700"><%= @signing_session.completed_at&.strftime('%B %d, %Y at %I:%M %p %Z') %></p>
+    </div>
+
+    <p class="text-xs text-gray-400">
+      This window can now be closed. The document owner will receive the completed documents.
+    </p>
+  </div>
+</div>

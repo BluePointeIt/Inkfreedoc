@@ -1,0 +1,79 @@
+<div class="mx-auto max-w-7xl px-4 py-6">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">Flagged Activity</h1>
+    <%= link_to signing_analytics_path, class: "btn btn-ghost btn-sm" do %>
+      &larr; Back to Analytics
+    <% end %>
+  </div>
+
+  <% if @flagged_submissions.empty? %>
+    <div class="bg-base-100 rounded-lg shadow p-12 text-center">
+      <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <h2 class="text-lg font-semibold text-gray-700">No Suspicious Activity</h2>
+      <p class="text-gray-500 mt-1">All signings appear normal</p>
+    </div>
+  <% else %>
+    <div class="space-y-4">
+      <% @flagged_submissions.each do |submission| %>
+        <div class="bg-base-100 rounded-lg shadow p-6">
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <h3 class="font-semibold">
+                <%= link_to submission.template&.name || "Submission ##{submission.id}",
+                    submission_path(submission),
+                    class: "link link-primary" %>
+              </h3>
+              <p class="text-sm text-gray-500">
+                Created <%= submission.created_at.strftime('%B %d, %Y') %>
+              </p>
+            </div>
+          </div>
+
+          <% flags = @flags_by_submission[submission.id] || [] %>
+          <% flags.each do |flag| %>
+            <div class="alert <%= flag[:severity] == 'high' ? 'alert-error' : 'alert-warning' %> mb-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+              <div>
+                <span class="font-semibold"><%= flag[:type].humanize %>:</span>
+                <%= flag[:details] %>
+              </div>
+              <span class="badge badge-sm"><%= flag[:severity] %></span>
+            </div>
+          <% end %>
+
+          <!-- Signers for this submission -->
+          <div class="mt-4">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Signer</th>
+                  <th>IP Address</th>
+                  <th>Location</th>
+                  <th>Device</th>
+                  <th>Mode</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% submission.signing_locations.includes(:submitter).each do |loc| %>
+                  <tr>
+                    <td><%= loc.submitter.email %></td>
+                    <td class="font-mono text-xs"><%= loc.ip_address %></td>
+                    <td><%= [loc.city, loc.country_code].compact.join(', ') %></td>
+                    <td class="capitalize"><%= loc.device_type %></td>
+                    <td><%= loc.signing_mode.humanize %></td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>

@@ -46,6 +46,9 @@ class Submission < ApplicationRecord
 
   has_many :submitters, dependent: :destroy
   has_many :submission_events, dependent: :destroy
+  has_many :document_hashes, dependent: :destroy
+  has_many :signing_sessions, dependent: :destroy
+  has_many :signing_locations, through: :submitters
 
   attribute :preferences, :string, default: -> { {} }
 

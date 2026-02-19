@@ -52,7 +52,24 @@ module Submitters
           ActiveStorage::Attachment.where(uuid: touch_attachment_uuid, record: submitter).touch_all(:created_at)
         end
 
-        SubmissionEvents.create_with_tracking_data(submitter, 'complete_form', request) if params[:completed] == 'true'
+        if params[:completed] == 'true'
+          event = SubmissionEvents.create_with_tracking_data(submitter, 'complete_form', request)
+
+          # Capture enhanced signing metadata (location, device, audit hash)
+          SigningMetadataCapture.enhance_event(
+            event:,
+            submitter:,
+            request:,
+            gps_params: {
+              gps_latitude:          params[:gps_latitude],
+              gps_longitude:         params[:gps_longitude],
+              gps_accuracy:          params[:gps_accuracy],
+              gps_permission_granted: params[:gps_permission_granted],
+              local_time:            params[:local_time],
+              local_timezone:        params[:local_timezone]
+            }
+          )
+        end
 
         submitter.save!
       end

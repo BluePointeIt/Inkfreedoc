@@ -49,6 +49,10 @@ gem 'turbo-rails'
 gem 'twitter_cldr', require: false
 gem 'tzinfo-data'
 
+# InkFreeDoc additions - location tracking and device detection
+gem 'maxmind-geoip2', require: false
+gem 'browser', '~> 6.0'
+
 group :development, :test do
   gem 'better_html'
   gem 'bullet'
