@@ -18,6 +18,17 @@
           <span><%= t('export') %></span>
         <% end %>
         <% if !@template.archived_at? && can?(:create, Submission) %>
+          <% if @template.submitters.size == 1 %>
+            <%= button_to start_form_path(@template.slug), params: { selfsign: true }, method: :put, class: 'white-button !border', form: { style: 'display: inline', target: '_blank', data: { turbo: false } } do %>
+              <%= svg_icon('writing', class: 'w-6 h-6') %>
+              <span class="hidden md:inline"><%= t('sign_it_yourself') %></span>
+            <% end %>
+          <% else %>
+            <%= link_to new_template_submission_path(@template, selfsign: true), class: 'white-button !border', data: { turbo_frame: 'modal' } do %>
+              <%= svg_icon('writing', class: 'w-6 h-6') %>
+              <span class="hidden md:inline"><%= t('sign_it_yourself') %></span>
+            <% end %>
+          <% end %>
           <%= link_to new_template_submission_path(@template), id: 'add_recipients_button', class: 'white-button !border', data: { turbo_frame: 'modal' } do %>
             <%= svg_icon('plus', class: 'w-6 h-6 stroke-2') %>
             <%= t('add_recipients_html') %>
