@@ -570,7 +570,7 @@ module Submissions
     end
 
     def sign_reason
-      'Signed with DocuSeal.com'
+      "Signed with #{Docuseal.product_name}"
     end
 
     def select_attachments(submitter)
