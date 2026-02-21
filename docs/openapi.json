@@ -12,10 +12,10 @@
   ],
   "info": {
     "version": "1.0.0",
-    "title": "DocuSeal API",
-    "description": "DocuSeal API specs",
+    "title": "InkFreeDoc API",
+    "description": "InkFreeDoc API specs",
     "contact": {
-      "name": "DocuSeal",
+      "name": "InkFreeDoc",
       "email": "admin@docuseal.com",
       "url": "https://www.docuseal.com"
     }

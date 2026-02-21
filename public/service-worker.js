@@ -1,9 +1,9 @@
 self.addEventListener('install', () => {
-  console.log('DocuSeal App installed')
+  console.log('InkFreeDoc App installed')
 })
 
 self.addEventListener('activate', () => {
-  console.log('DocuSeal App activated')
+  console.log('InkFreeDoc App activated')
 })
 
 self.addEventListener('fetch', (event) => {
