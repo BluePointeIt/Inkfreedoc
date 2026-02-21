@@ -1,1 +1,24 @@
-<%= render 'logo_placeholder' %>
+<div class="my-4">
+  <% if current_account.logo.attached? %>
+    <div class="flex items-center space-x-4 mb-4">
+      <div class="border rounded-lg p-2 bg-base-200">
+        <%= image_tag current_account.logo, class: 'max-h-16 max-w-xs object-contain' %>
+      </div>
+      <div>
+        <p class="text-sm text-base-content/70"><%= current_account.logo.filename %></p>
+        <%= button_to t('remove'), settings_personalization_remove_logo_path, method: :delete, class: 'btn btn-sm btn-error btn-outline mt-1', data: { turbo_confirm: t('are_you_sure_') } %>
+      </div>
+    </div>
+  <% end %>
+  <%= form_with url: settings_personalization_upload_logo_path, method: :post do |f| %>
+    <div class="form-control">
+      <label class="label">
+        <span class="label-text"><%= t('upload_logo') %></span>
+      </label>
+      <%= f.file_field :logo, accept: 'image/png,image/jpeg,image/svg+xml,image/webp', class: 'file-input file-input-bordered w-full max-w-xs' %>
+    </div>
+    <div class="mt-3">
+      <%= f.submit t('save'), class: 'btn btn-primary' %>
+    </div>
+  <% end %>
+</div>

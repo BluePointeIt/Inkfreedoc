@@ -31,6 +31,7 @@ COPY ./package.json ./yarn.lock ./
 RUN yarn install --network-timeout 1000000
 
 COPY ./bin/shakapacker ./bin/shakapacker
+RUN sed -i 's/\r$//' ./bin/shakapacker
 COPY ./config/webpack ./config/webpack
 COPY ./config/shakapacker.yml ./config/shakapacker.yml
 COPY ./postcss.config.js ./postcss.config.js
@@ -72,6 +73,7 @@ COPY --chown=docuseal:docuseal ./Gemfile ./Gemfile.lock ./
 RUN apk add --no-cache build-base git && bundle install && apk del --no-cache build-base git && rm -rf ~/.bundle /usr/local/bundle/cache && ruby -e "puts Dir['/usr/local/bundle/**/{spec,rdoc,resources/shared,resources/collation,resources/locales}']" | xargs rm -rf && ln -sf /usr/lib/libonnxruntime.so.1 $(ruby -e "print Dir[Gem::Specification.find_by_name('onnxruntime').gem_dir + '/vendor/*.so'].first")
 
 COPY --chown=docuseal:docuseal ./bin ./bin
+RUN find ./bin -type f -exec sed -i 's/\r$//' {} +
 COPY --chown=docuseal:docuseal ./app ./app
 COPY --chown=docuseal:docuseal ./config ./config
 COPY --chown=docuseal:docuseal ./db/migrate ./db/migrate
@@ -80,6 +82,7 @@ COPY --chown=docuseal:docuseal ./lib ./lib
 COPY --chown=docuseal:docuseal ./public ./public
 COPY --chown=docuseal:docuseal ./tmp ./tmp
 COPY --chown=docuseal:docuseal LICENSE README.md Rakefile config.ru .version ./
+RUN sed -i 's/\r$//' Rakefile config.ru
 COPY --chown=docuseal:docuseal .version ./public/version
 
 COPY --chown=docuseal:docuseal --from=download /fonts/GoNotoKurrent-Regular.ttf /fonts/GoNotoKurrent-Bold.ttf /fonts/DancingScript-Regular.otf /fonts/OFL.txt /fonts

@@ -3,20 +3,47 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    image: docuseal/docuseal:latest
+      redis:
+        condition: service_healthy
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - 3000:3000
     volumes:
       - ./docuseal:/data/docuseal
       - ./geoip:/app/db/geoip:ro
     environment:
-      - FORCE_SSL=${HOST}
+      - FORCE_SSL=${HOST:-}
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/docuseal
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE:-supersecretkey123changethisinproduction}
+    restart: unless-stopped
+
+  sidekiq:
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: /app/bin/bundle exec sidekiq -C /app/config/sidekiq.yml
+    working_dir: /app
+    volumes:
+      - ./docuseal:/data/docuseal
+      - ./geoip:/app/db/geoip:ro
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/docuseal
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE:-supersecretkey123changethisinproduction}
+    restart: unless-stopped
 
   postgres:
-    image: postgres:18
+    image: postgres:16
     volumes:
-      - './pg_data:/var/lib/postgresql/18/docker'
+      - pg_data:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -26,15 +53,34 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
   caddy:
     image: caddy:latest
-    command: caddy reverse-proxy --from $HOST --to app:3000
+    command: caddy reverse-proxy --from ${HOST:-localhost} --to app:3000
     ports:
       - 80:80
       - 443:443
       - 443:443/udp
     volumes:
-      - ./caddy:/data/caddy
+      - caddy_data:/data/caddy
     environment:
-      - HOST=${HOST}
+      - HOST=${HOST:-localhost}
+    profiles:
+      - production
+
+volumes:
+  pg_data:
+  redis_data:
+  caddy_data:

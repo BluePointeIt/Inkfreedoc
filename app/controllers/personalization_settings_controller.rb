@@ -19,6 +19,22 @@ class PersonalizationSettingsController < ApplicationController
     authorize!(:read, AccountConfig)
   end
 
+  def upload_logo
+    authorize!(:create, AccountConfig)
+
+    current_account.logo.attach(params[:logo])
+
+    redirect_back(fallback_location: settings_personalization_path, notice: I18n.t('settings_have_been_saved'))
+  end
+
+  def remove_logo
+    authorize!(:create, AccountConfig)
+
+    current_account.logo.purge
+
+    redirect_back(fallback_location: settings_personalization_path, notice: I18n.t('settings_have_been_saved'))
+  end
+
   def create
     if @account_config.value.is_a?(Hash)
       @account_config.value = @account_config.value.reject do |_, v|
