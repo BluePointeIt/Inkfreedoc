@@ -30,6 +30,13 @@
   </a>
   <div class="absolute top-0 bottom-0 w-0 items-center hidden md:group-hover:flex" style="right: 37px" data-targets="dashboard-dropzone.hiddenOnDrag">
     <div class="space-y-1">
+      <% if !template.archived_at? && can?(:create, Submission) %>
+        <span class="tooltip tooltip-left" data-tip="<%= t('add_recipients') %>">
+          <a href="<%= new_template_submission_path(template) %>" data-turbo-frame="modal" class="btn btn-xs btn-primary btn-circle">
+            <%= svg_icon('mail_forward', class: 'w-4 h-4') %>
+          </a>
+        </span>
+      <% end %>
       <% if can?(:update, template) && !template.archived_at? && template.account_id == current_account.id %>
         <span class="tooltip tooltip-left" data-tip="<%= t('move') %>">
           <a href="<%= edit_template_folder_path(template.id) %>" data-turbo-frame="modal" class="btn btn-xs hover:btn-outline bg-base-200 btn-circle">
