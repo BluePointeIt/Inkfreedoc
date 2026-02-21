@@ -30,21 +30,6 @@ class SubmitFormController < ApplicationController
     Submitters::MaybeUpdateDefaultValues.call(@submitter, current_user)
 
     @attachments_index = build_attachments_index(submission)
-
-    return unless @form_configs[:prefill_signature]
-
-    if (user_signature = UserConfigs.load_signature(current_user))
-      @signature_attachment = ActiveStorage::Attachment.find_or_create_by!(
-        blob_id: user_signature.blob_id,
-        name: 'attachments',
-        record: @submitter
-      )
-    end
-
-    @signature_attachment ||=
-      Submitters::MaybeAssignDefaultBrowserSignature.call(@submitter, params, cookies, @attachments_index.values)
-
-    @attachments_index[@signature_attachment.uuid] = @signature_attachment if @signature_attachment
   end
 
   def update

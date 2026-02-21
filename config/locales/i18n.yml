@@ -471,7 +471,7 @@ en: &en
   there_are_no_submissions: There are no Submissions
   send_an_invitation_to_fill_and_complete_the_form: Send an invitation to fill and complete the form
   send_to_recipients: Send to Recipients
-  sign_it_yourself: Sign it Yourself
+  sign_it_yourself: Sign it Locally
   api_and_embedding: API and Embedding
   template_id: Template ID
   embedding_url: Embedding URL

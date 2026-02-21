@@ -63,7 +63,7 @@ const en = {
   remove_condition: 'Remove condition',
   add_condition: 'Add condition',
   are_you_sure_: 'Are you sure?',
-  sign_yourself: 'Sign Yourself',
+  sign_yourself: 'Sign Locally',
   set_signing_date: 'Set signing date',
   signing_date: 'Signing Date',
   send: 'Send',

@@ -36,14 +36,8 @@ module Submitters
         user.first_name
       elsif field_name == 'last name'
         user.last_name
-      elsif field['type'] == 'initials' && (initials = UserConfigs.load_initials(user))
-        attachment = ActiveStorage::Attachment.find_or_create_by!(
-          blob_id: initials.blob_id,
-          name: 'attachments',
-          record: submitter
-        )
-
-        attachment.uuid
+      elsif field['type'] == 'initials'
+        nil
       end
     end
   end
