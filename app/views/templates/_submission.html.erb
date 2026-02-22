@@ -7,7 +7,7 @@
         <div class="font-medium items-start w-full group-hover:link text-sm flex space-x-1">
           <%= svg_icon('file_text', class: 'w-4 h-4 mt-0.5 flex-shrink-0') %>
           <span style="overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;">
-            <% (submission.name || template.name).split(/(_)/).each do |item| %><%= item %><wbr><% end %>
+            <% (submission.name || template&.name || t('untitled')).split(/(_)/).each do |item| %><%= item %><wbr><% end %>
             <%= svg_icon('arrow_right', class: 'w-4 h-4 sm:inline group-hover:visible invisible hidden') %>
           </span>
         </div>
@@ -16,7 +16,7 @@
         <div class="flex text-xs flex-col text-base-content/60  space-y-0.5">
           <span class="flex items-center space-x-1">
             <%= svg_icon('user', class: 'w-4 h-4 flex-shrink-0') %>
-            <span><%= (submission.created_by_user || template.author).full_name.presence || (submission.created_by_user || template.author).email.to_s.sub(/\+\w+@/, '@') %></span>
+            <span><%= (submission.created_by_user || template&.author)&.full_name.presence || (submission.created_by_user || template&.author)&.email.to_s.sub(/\+\w+@/, '@') %></span>
           </span>
           <span class="flex items-center space-x-1">
             <%= svg_icon('calendar', class: 'w-4 h-4 flex-shrink-0') %>
@@ -27,7 +27,7 @@
     </a>
   <% end %>
   <div class="w-full flex flex-col md:flex-row space-y-4 md:space-y-0 md:justify-between px-5 md:px-6 pb-5 md:items-center pt-5 relative cursor-pointer">
-    <% submitters = (submission.template_submitters || submission.template.submitters).filter_map { |item| submission.submitters.find { |e| e.uuid == item['uuid'] } } %>
+    <% submitters = (submission.template_submitters || submission.template&.submitters || []).filter_map { |item| submission.submitters.find { |e| e.uuid == item['uuid'] } } %>
     <% is_submission_completed = submitters.all?(&:completed_at?) && submitters.size.positive? %>
     <% if submitters.size == 1 %>
       <div>
