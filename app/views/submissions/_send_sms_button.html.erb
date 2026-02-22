@@ -1,5 +1,9 @@
 <div class="mt-2 mb-1">
-  <div class="tooltip w-full" data-tip="<%= t('send_signature_requests_via_sms') %>">
-    <%= link_to submitter.sent_at? ? t('re_send_sms') : t('send_sms'), settings_sms_index_path, class: 'btn btn-sm btn-primary w-full' %>
-  </div>
+  <% if Accounts.can_send_sms?(current_account) %>
+    <%= button_to button_title(title: submitter.sent_at? ? t('re_send_sms') : t('send_sms'), disabled_with: t('sending')), submitter_send_sms_index_path(submitter_slug: submitter.slug), class: 'btn btn-sm btn-primary w-full' %>
+  <% else %>
+    <div class="tooltip w-full" data-tip="<%= t('send_signature_requests_via_sms') %>">
+      <%= link_to t('send_sms'), settings_sms_index_path, class: 'btn btn-sm btn-primary btn-disabled w-full' %>
+    </div>
+  <% end %>
 </div>

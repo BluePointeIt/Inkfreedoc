@@ -52,6 +52,7 @@ gem 'tzinfo-data'
 # InkFreeDoc additions - location tracking and device detection
 gem 'maxmind-geoip2', require: false
 gem 'browser', '~> 6.0'
+gem 'twilio-ruby', '~> 7.0', require: false
 
 group :development, :test do
   gem 'better_html'

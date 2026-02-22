@@ -588,6 +588,9 @@ en: &en
   user_nameid_not_found: 'User %{nameid} not found.'
   sso_settings_have_been_updated: SSO settings have been updated.
   sms_has_been_sent: SMS has been sent.
+  sms_has_been_sent_already: SMS has been sent already.
+  sms_is_not_configured: SMS is not configured. Please configure Twilio in Settings.
+  sms_signing_invitation_message: "You have a document to sign. Please open the following link: %{url}"
   account_has_been_created: Account has been created.
   account_has_been_updated: Account has been updated.
   account_has_been_removed: Account has been removed.

@@ -180,6 +180,10 @@ module Accounts
     EncryptedConfig.exists?(key: EncryptedConfig::EMAIL_SMTP_KEY)
   end
 
+  def can_send_sms?(account)
+    TwilioSms.configured?(account)
+  end
+
   def can_send_invitation_emails?(_account)
     true
   end

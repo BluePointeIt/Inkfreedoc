@@ -1,1 +1,20 @@
-
+<% value = @encrypted_config.value || {} %>
+<%= form_for @encrypted_config, url: settings_sms_index_path, method: :post, html: { autocomplete: 'off', class: 'space-y-4' } do |f| %>
+  <%= f.fields_for :value do |ff| %>
+    <div class="form-control">
+      <%= ff.label :account_sid, 'Account SID', class: 'label' %>
+      <%= ff.text_field :account_sid, value: value['account_sid'], required: true, class: 'base-input' %>
+    </div>
+    <div class="form-control">
+      <%= ff.label :auth_token, 'Auth Token', class: 'label' %>
+      <%= ff.password_field :auth_token, class: 'base-input', required: value['auth_token'].present?, placeholder: value['auth_token'].present? ? '*************' : '' %>
+    </div>
+    <div class="form-control">
+      <%= ff.label :from_number, 'From Phone Number', class: 'label' %>
+      <%= ff.telephone_field :from_number, value: value['from_number'], required: true, class: 'base-input', placeholder: '+1234567890' %>
+    </div>
+  <% end %>
+  <div class="form-control pt-2">
+    <%= f.button button_title(title: t('save'), disabled_with: t('saving')), class: 'base-button' %>
+  </div>
+<% end %>
