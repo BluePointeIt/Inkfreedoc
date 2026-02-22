@@ -1,0 +1,69 @@
+<div class="max-w-xl mx-auto px-2">
+  <h1 class="text-4xl font-bold text-center my-8">
+    <span><%= t('create_an_account') %></span>
+  </h1>
+  <%= form_for(@user, as: :user, url: registration_path(resource_name), html: { class: 'space-y-6' }) do |f| %>
+    <div class="space-y-2">
+      <div class="grid gap-2 md:grid-cols-2 md:gap-4">
+        <div class="form-control">
+          <%= f.label :first_name, t('first_name'), class: 'label' %>
+          <%= f.text_field :first_name, required: true, class: 'base-input' %>
+        </div>
+        <div class="form-control">
+          <%= f.label :last_name, t('last_name'), class: 'label' %>
+          <%= f.text_field :last_name, required: true, class: 'base-input' %>
+        </div>
+      </div>
+      <div class="form-control">
+        <%= f.label :email, t('email'), class: 'label' %>
+        <%= f.email_field :email, required: true, autocomplete: 'email', class: 'base-input' %>
+      </div>
+      <%= fields_for @account do |ff| %>
+        <set-timezone data-input-id="account_timezone"></set-timezone>
+        <%= ff.hidden_field :timezone %>
+        <div class="form-control">
+          <%= ff.label :name, t('company_name'), class: 'label' %>
+          <%= ff.text_field :name, required: true, class: 'base-input' %>
+        </div>
+      <% end %>
+      <div class="form-control">
+        <%= f.label :password, t('password'), class: 'label' %>
+        <password-input class="block relative">
+          <%= f.password_field :password, required: true, placeholder: '************', class: 'base-input w-full pr-10', data: { target: 'password-input.passwordInput' } %>
+          <button data-target="password-input.togglePasswordVisibility" type="button" class="absolute inset-y-0 h-12 right-0 pr-3 flex items-center">
+            <span data-target="password-input.hiddenPasswordIcon">
+              <%= svg_icon('eye', class: 'w-6 h-6 shrink-0 bg-white') %>
+            </span>
+            <span data-target="password-input.visiblePasswordIcon" class="hidden">
+              <%= svg_icon('eye_off', class: 'w-6 h-6 shrink-0 bg-white') %>
+            </span>
+          </button>
+        </password-input>
+      </div>
+    </div>
+    <% if @user.errors.any? %>
+      <div class="alert alert-error">
+        <ul>
+          <% @user.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+    <% if @account.errors.any? %>
+      <div class="alert alert-error">
+        <ul>
+          <% @account.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+    <div class="form-control">
+      <%= f.button button_title(title: t('sign_up')), class: 'base-button' %>
+    </div>
+  <% end %>
+  <div class="text-center mt-4">
+    <%= link_to t('sign_in'), new_user_session_path, class: 'link' %>
+  </div>
+</div>

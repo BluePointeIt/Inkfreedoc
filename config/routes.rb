@@ -3,8 +3,8 @@
 Rails.application.routes.draw do
   mount LetterOpenerWeb::Engine, at: '/letter_opener' if Rails.env.development?
 
-  if !Docuseal.multitenant? && defined?(Sidekiq::Web)
-    authenticated :user, ->(u) { u.sidekiq? } do
+  if defined?(Sidekiq::Web)
+    authenticated :user, ->(u) { u.superadmin? || (!Docuseal.multitenant? && u.sidekiq?) } do
       mount Sidekiq::Web => '/jobs'
     end
   end
@@ -31,13 +31,18 @@ Rails.application.routes.draw do
   post '/sign/kiosk/:token/advance', to: 'in_person_sessions#advance', as: :kiosk_advance
   post '/sign/kiosk/:token/complete', to: 'in_person_sessions#complete_signer', as: :kiosk_complete
 
-  devise_for :users, path: '/', only: %i[sessions passwords],
-                     controllers: { sessions: 'sessions', passwords: 'passwords' }
+  devise_for :users, path: '/', only: %i[sessions passwords registrations],
+                     controllers: { sessions: 'sessions', passwords: 'passwords',
+                                    registrations: 'registrations' }
 
   devise_scope :user do
     resource :invitation, only: %i[update] do
       get '' => :edit
     end
+  end
+
+  namespace :admin do
+    resources :accounts
   end
 
   namespace :api, defaults: { format: :json } do
@@ -187,8 +192,8 @@ Rails.application.routes.draw do
     unless Docuseal.multitenant?
       resources :storage, only: %i[index create], controller: 'storage_settings'
       resources :search_entries_reindex, only: %i[create]
-      resources :sms, only: %i[index create], controller: 'sms_settings'
     end
+    resources :sms, only: %i[index create], controller: 'sms_settings'
     if Docuseal.demo? || !Docuseal.multitenant?
       resources :api, only: %i[index create], controller: 'api_settings'
       resource :reveal_access_token, only: %i[show create], controller: 'reveal_access_token'

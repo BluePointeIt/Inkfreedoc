@@ -4,6 +4,12 @@ class Ability
   include CanCan::Ability
 
   def initialize(user)
+    if user.superadmin?
+      can :manage, :all
+      can :manage, :superadmin
+      return
+    end
+
     can %i[read create update], Template, Abilities::TemplateConditions.collection(user) do |template|
       Abilities::TemplateConditions.entity(template, user:, ability: 'manage')
     end

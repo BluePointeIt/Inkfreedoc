@@ -18,6 +18,7 @@ services:
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/docuseal
       - REDIS_URL=redis://redis:6379/0
       - SECRET_KEY_BASE=${SECRET_KEY_BASE:-supersecretkey123changethisinproduction}
+      - MULTITENANT=true
     restart: unless-stopped
 
   sidekiq:
@@ -38,6 +39,7 @@ services:
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/docuseal
       - REDIS_URL=redis://redis:6379/0
       - SECRET_KEY_BASE=${SECRET_KEY_BASE:-supersecretkey123changethisinproduction}
+      - MULTITENANT=true
     restart: unless-stopped
 
   postgres:

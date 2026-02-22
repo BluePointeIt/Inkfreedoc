@@ -1,0 +1,79 @@
+<div class="max-w-6xl mx-auto px-4 md:px-2">
+  <div class="flex flex-col md:flex-row md:flex-wrap gap-2 md:justify-between md:items-end mb-4 min-h-12">
+    <h1 class="text-4xl font-bold">Admin Dashboard</h1>
+    <div class="flex gap-4 items-center">
+      <%= link_to new_admin_account_path, class: 'btn btn-primary btn-md gap-2' do %>
+        <%= svg_icon('plus', class: 'w-6 h-6') %>
+        <span>Add Company</span>
+      <% end %>
+    </div>
+  </div>
+
+  <% if notice.present? %>
+    <div class="alert alert-success mb-4"><%= notice %></div>
+  <% end %>
+  <% if alert.present? %>
+    <div class="alert alert-error mb-4"><%= alert %></div>
+  <% end %>
+
+  <div class="overflow-x-auto">
+    <table class="table w-full table-lg rounded-b-none overflow-hidden">
+      <thead class="bg-base-200">
+        <tr class="text-neutral uppercase">
+          <th>Company</th>
+          <th>Admin</th>
+          <th>Users</th>
+          <th>Templates</th>
+          <th>Submissions</th>
+          <th>Status</th>
+          <th>Created</th>
+          <th class="text-right" width="1px"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @accounts.each do |account| %>
+          <tr scope="row">
+            <td class="font-medium">
+              <%= link_to account.name, admin_account_path(account), class: 'link' %>
+            </td>
+            <td>
+              <%= account.users.admins.first&.email || account.users.first&.email || '-' %>
+            </td>
+            <td><%= account.users.count %></td>
+            <td><%= account.templates.count %></td>
+            <td><%= account.submissions.count %></td>
+            <td>
+              <% if account.archived_at? %>
+                <span class="badge badge-error badge-outline">Disabled</span>
+              <% else %>
+                <span class="badge badge-success badge-outline">Active</span>
+              <% end %>
+            </td>
+            <td>
+              <%= l(account.created_at, format: :short) %>
+            </td>
+            <td class="flex items-center space-x-2 justify-end">
+              <%= link_to admin_account_path(account), class: 'btn btn-outline btn-xs' do %>
+                View
+              <% end %>
+              <% if account.archived_at? %>
+                <%= button_to admin_account_path(account), method: :put, params: { toggle_status: true }, class: 'btn btn-outline btn-success btn-xs', data: { turbo_confirm: 'Enable this account?' } do %>
+                  Enable
+                <% end %>
+              <% else %>
+                <%= button_to admin_account_path(account), method: :put, params: { toggle_status: true }, class: 'btn btn-outline btn-warning btn-xs', data: { turbo_confirm: 'Disable this account?' } do %>
+                  Disable
+                <% end %>
+              <% end %>
+              <% if account.id != current_user.account_id %>
+                <%= button_to admin_account_path(account), method: :delete, class: 'btn btn-outline btn-error btn-xs', data: { turbo_confirm: "Permanently delete '#{account.name}'? This cannot be undone." } do %>
+                  Delete
+                <% end %>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

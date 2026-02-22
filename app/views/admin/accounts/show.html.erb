@@ -1,0 +1,91 @@
+<div class="max-w-6xl mx-auto px-4 md:px-2">
+  <div class="mb-4">
+    <%= link_to admin_accounts_path, class: 'flex items-center space-x-1 text-neutral font-medium' do %>
+      <%= svg_icon('arrow_left', class: 'w-4 h-4 stroke-2') %>
+      <span>Back to accounts</span>
+    <% end %>
+  </div>
+
+  <% if notice.present? %>
+    <div class="alert alert-success mb-4"><%= notice %></div>
+  <% end %>
+
+  <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-6">
+    <div>
+      <h1 class="text-4xl font-bold"><%= @account.name %></h1>
+      <p class="text-neutral mt-1">Created <%= l(@account.created_at, format: :long) %></p>
+    </div>
+    <div class="flex gap-2">
+      <% if @account.archived_at? %>
+        <%= button_to admin_account_path(@account), method: :put, params: { toggle_status: true }, class: 'btn btn-success btn-sm', data: { turbo_confirm: 'Enable this account?' } do %>
+          Enable Account
+        <% end %>
+      <% else %>
+        <%= button_to admin_account_path(@account), method: :put, params: { toggle_status: true }, class: 'btn btn-warning btn-sm', data: { turbo_confirm: 'Disable this account?' } do %>
+          Disable Account
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+    <div class="stat bg-base-200 rounded-box p-4">
+      <div class="stat-title">Status</div>
+      <div class="stat-value text-lg">
+        <% if @account.archived_at? %>
+          <span class="badge badge-error">Disabled</span>
+        <% else %>
+          <span class="badge badge-success">Active</span>
+        <% end %>
+      </div>
+    </div>
+    <div class="stat bg-base-200 rounded-box p-4">
+      <div class="stat-title">Users</div>
+      <div class="stat-value text-lg"><%= @account.users.count %></div>
+    </div>
+    <div class="stat bg-base-200 rounded-box p-4">
+      <div class="stat-title">Templates</div>
+      <div class="stat-value text-lg"><%= @account.templates.count %></div>
+    </div>
+    <div class="stat bg-base-200 rounded-box p-4">
+      <div class="stat-title">Submissions</div>
+      <div class="stat-value text-lg"><%= @account.submissions.count %></div>
+    </div>
+  </div>
+
+  <h2 class="text-2xl font-bold mb-4">Users</h2>
+  <div class="overflow-x-auto">
+    <table class="table w-full table-lg rounded-b-none overflow-hidden">
+      <thead class="bg-base-200">
+        <tr class="text-neutral uppercase">
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Status</th>
+          <th>Last Sign In</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @account.users.each do |user| %>
+          <tr scope="row">
+            <td><%= user.full_name %></td>
+            <td><%= user.email %></td>
+            <td>
+              <span class="badge badge-info badge-outline"><%= user.role %></span>
+            </td>
+            <td>
+              <% if user.archived_at? %>
+                <span class="badge badge-error badge-outline">Archived</span>
+              <% else %>
+                <span class="badge badge-success badge-outline">Active</span>
+              <% end %>
+            </td>
+            <td>
+              <%= user.current_sign_in_at ? l(user.current_sign_in_at, format: :short) : '-' %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

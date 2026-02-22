@@ -48,7 +48,8 @@
 #
 class User < ApplicationRecord
   ROLES = [
-    ADMIN_ROLE = 'admin'
+    ADMIN_ROLE = 'admin',
+    SUPERADMIN_ROLE = 'superadmin'
   ].freeze
 
   EMAIL_REGEXP = /[^@;,<>\s]+@[^@;,<>\s]+/
@@ -68,7 +69,7 @@ class User < ApplicationRecord
   has_many :encrypted_configs, dependent: :destroy, class_name: 'EncryptedUserConfig'
   has_many :email_messages, dependent: :destroy, foreign_key: :author_id, inverse_of: :author
 
-  devise :two_factor_authenticatable, :recoverable, :rememberable, :validatable, :trackable, :lockable
+  devise :two_factor_authenticatable, :registerable, :recoverable, :rememberable, :validatable, :trackable, :lockable
 
   attribute :role, :string, default: ADMIN_ROLE
   attribute :uuid, :string, default: -> { SecureRandom.uuid }
@@ -91,10 +92,14 @@ class User < ApplicationRecord
     true
   end
 
+  def superadmin?
+    role == SUPERADMIN_ROLE
+  end
+
   def sidekiq?
     return true if Rails.env.development?
 
-    role == 'admin'
+    role.in?(%w[admin superadmin])
   end
 
   def self.sign_in_after_reset_password

@@ -17,6 +17,9 @@
       <% else %>
         <div class="flex items-center justify-center space-x-4 mr-1">
           <%= render 'shared/navbar_buttons' %>
+          <% if current_user.superadmin? %>
+            <%= link_to 'Admin', admin_accounts_path, class: 'hidden md:inline-flex font-medium text-lg' %>
+          <% end %>
           <%= link_to t('settings'), settings_profile_index_path, class: 'hidden md:inline-flex font-medium text-lg', id: 'account_settings_button' %>
         </div>
       <% end %>
@@ -31,6 +34,14 @@
               <span class="mr-1"><%= t('profile') %></span>
             <% end %>
           </li>
+          <% if current_user.superadmin? %>
+            <li>
+              <%= link_to admin_accounts_path, class: 'flex items-center' do %>
+                <%= svg_icon('building', class: 'w-5 h-5 flex-shrink-0 stroke-2') %>
+                <span class="mr-1 whitespace-nowrap">Admin</span>
+              <% end %>
+            </li>
+          <% end %>
           <% if !Docuseal.demo? && can?(:manage, EncryptedConfig) %>
             <li>
               <%= link_to Docuseal.multitenant? ? console_redirect_index_path : Docuseal::CONSOLE_URL, data: { prefetch: false }, class: 'flex items-center' do %>
