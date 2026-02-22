@@ -78,6 +78,7 @@ class TemplatesController < ApplicationController
   def destroy
     notice =
       if params[:permanently].in?(['true', true])
+        @template.submissions.update_all(template_id: nil)
         @template.destroy!
 
         I18n.t('template_has_been_removed')
