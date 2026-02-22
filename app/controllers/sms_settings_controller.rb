@@ -9,7 +9,7 @@ class SmsSettingsController < ApplicationController
 
   def create
     if @encrypted_config.update(sms_configs)
-      redirect_to settings_sms_index_path, notice: I18n.t('changes_have_been_saved')
+      redirect_to settings_sms_path, notice: I18n.t('changes_have_been_saved')
     else
       render :index, status: :unprocessable_content
     end
