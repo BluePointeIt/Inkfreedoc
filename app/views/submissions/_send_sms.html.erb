@@ -1,3 +1,22 @@
 <div class="form-control">
-  <%= render 'sms_settings/placeholder' %>
+  <% can_send_sms = Accounts.can_send_sms?(current_account) %>
+  <div class="flex justify-between items-center">
+    <%= f.label :send_sms, for: uuid = SecureRandom.uuid, class: 'flex items-center cursor-pointer' do %>
+      <%= f.check_box :send_sms, id: uuid, class: 'base-checkbox', disabled: !can_send_sms, checked: can_send_sms && local_assigns.fetch(:checked, false) %>
+      <span class="label"><%= t('send_sms') %></span>
+    <% end %>
+  </div>
+  <% if !Docuseal.multitenant? && !can_send_sms %>
+    <div class="alert my-4">
+      <%= svg_icon('info_circle', class: 'w-6 h-6') %>
+      <div>
+        <p class="font-bold"><%= t('sms_is_not_configured') %></p>
+        <p class="text-gray-700">
+          <a class="link font-medium" data-turbo-frame="_top" href="<%= settings_sms_path %>">
+            <%= t('go_to_sms_settings') %>
+          </a>
+        </p>
+      </div>
+    </div>
+  <% end %>
 </div>
