@@ -72,6 +72,14 @@
             <%= svg_icon('loader', class: 'w-4 h-4 animate-spin disabled') %>
           <% end %>
         </span>
+        <% if !template.archived_at? %>
+          <span class="tooltip tooltip-left" data-tip="<%= t('delete') %>">
+            <%= button_to template_path(template, permanently: true), data: { turbo_confirm: t('template_deletion_is_irreversible_and_will_permanently_remove_all_associated_signed_documents_with_it_are_you_sure_') }, method: :delete, class: 'btn btn-xs hover:btn-error bg-base-200 btn-circle', aria_label: t('delete') do %>
+              <%= svg_icon('trash', class: 'w-4 h-4 enabled') %>
+              <%= svg_icon('loader', class: 'w-4 h-4 animate-spin disabled') %>
+            <% end %>
+          </span>
+        <% end %>
       <% end %>
     </div>
   </div>
