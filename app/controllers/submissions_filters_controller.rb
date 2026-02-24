@@ -4,6 +4,7 @@ class SubmissionsFiltersController < ApplicationController
   ALLOWED_NAMES = %w[
     author
     folder
+    template
     completed_at
     status
     created_at

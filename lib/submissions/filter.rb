@@ -6,6 +6,7 @@ module Submissions
       author
       status
       folder
+      template
       completed_at_from
       completed_at_to
       created_at_from
@@ -26,6 +27,7 @@ module Submissions
 
       submissions = filter_by_author(submissions, filters, current_user)
       submissions = filter_by_folder(submissions, filters, current_user)
+      submissions = filter_by_template(submissions, filters)
       submissions = filter_by_status(submissions, filters)
       submissions = filter_by_created_at(submissions, filters)
 
@@ -99,6 +101,12 @@ module Submissions
       folders += folders.preload(:subfolders).flat_map(&:subfolders)
 
       submissions.joins(:template).where(templates: { folder_id: folders.map(&:id) })
+    end
+
+    def filter_by_template(submissions, filters)
+      return submissions if filters[:template].blank?
+
+      submissions.joins(:template).where(templates: { name: filters[:template] })
     end
 
     def filter_by_completed_at(submissions, filters)

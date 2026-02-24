@@ -1,0 +1,7 @@
+<%= render 'filter_modal', title: t('template'), default_params: params.permit(*(Submissions::Filter::ALLOWED_PARAMS - ['template'])) do %>
+  <div class="space-y-2">
+    <div class="form-control mt-6">
+      <%= select_tag :template, options_for_select(current_account.templates.accessible_by(current_ability).where(archived_at: nil).order(:name).distinct.pluck(:name), params[:template]), include_blank: true, required: true, class: 'base-select' %>
+    </div>
+  </div>
+<% end %>

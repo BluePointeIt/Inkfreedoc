@@ -1,5 +1,5 @@
 <div class="h-44 relative group">
-  <a href="<%= template_path(template) %>" class="flex h-full flex-col justify-between rounded-2xl pt-6 px-7 w-full bg-base-200 before:border-2 before:border-base-300 before:border-dashed before:absolute before:left-0 before:right-0 before:top-0 before:bottom-0 before:hidden before:rounded-2xl" data-targets="dashboard-dropzone.templateCards">
+  <a href="<%= edit_template_path(template) %>" class="flex h-full flex-col justify-between rounded-2xl pt-6 px-7 w-full bg-base-200 before:border-2 before:border-base-300 before:border-dashed before:absolute before:left-0 before:right-0 before:top-0 before:bottom-0 before:hidden before:rounded-2xl" data-targets="dashboard-dropzone.templateCards">
     <div class="text-xl font-semibold" style="line-height: 1.6rem; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;">
       <% if template.template_accesses.present? %>
         <%= svg_icon('lock', class: 'w-6 h-6 inline -translate-y-[4px]') %>
@@ -51,10 +51,10 @@
             <%= svg_icon('loader', class: 'w-4 h-4 animate-spin disabled') %>
           <% end %>
         </span>
-      <% elsif can?(:update, template) %>
-        <span class="tooltip tooltip-left" data-tip="<%= t('edit') %>">
-          <a href="<%= edit_template_path(template) %>" class="btn btn-xs hover:btn-outline bg-base-200 btn-circle">
-            <%= svg_icon('pencil', class: 'w-4 h-4') %>
+      <% elsif can?(:read, template) %>
+        <span class="tooltip tooltip-left" data-tip="<%= t('submissions') %>">
+          <a href="<%= template_path(template) %>" class="btn btn-xs hover:btn-outline bg-base-200 btn-circle">
+            <%= svg_icon('list', class: 'w-4 h-4') %>
           </a>
         </span>
       <% end %>

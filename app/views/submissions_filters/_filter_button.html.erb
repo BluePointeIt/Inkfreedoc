@@ -35,5 +35,13 @@
         <span><%= t('author') %></span>
       <% end %>
     </li>
+    <% unless defined?(@template) && @template.present? %>
+      <li class="flex">
+        <%= link_to submissions_filter_path('template', query_params.merge(path: url_for)), data: { turbo_frame: 'modal' } do %>
+          <%= svg_icon('file_text', class: 'w-5 h-5 flex-shrink-0 stroke-2') %>
+          <span><%= t('template') %></span>
+        <% end %>
+      </li>
+    <% end %>
   </ul>
 </div>
