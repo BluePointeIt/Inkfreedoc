@@ -30,6 +30,8 @@ class ProcessSubmitterCompletionJob
     end
 
     enqueue_completed_webhooks(submitter, is_all_completed:)
+
+    submitter.submission.envelope&.update_status!
   end
 
   def create_completed_submitter!(submitter)

@@ -25,6 +25,9 @@ Rails.application.routes.draw do
     end
   end
 
+  # Envelopes - send multiple documents at once
+  resources :envelopes, only: %i[new create show]
+
   # In-Person / Kiosk Signing Sessions
   resources :in_person_sessions, only: [:create]
   get  '/sign/kiosk/:token', to: 'in_person_sessions#show', as: :kiosk_sign

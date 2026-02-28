@@ -660,6 +660,18 @@ en: &en
   awaiting: Awaiting
   document_id: Document ID
   envelope_id: Envelope ID
+  envelope: Envelope
+  new_envelope: New Envelope
+  select_templates: Select Templates
+  search_templates: Search templates...
+  local_in_person: Local / In-Person
+  signing_links_will_be_generated: Signing links will be generated after creation. No emails will be sent.
+  envelope_name: Envelope Name
+  send_envelope: Send Envelope
+  envelope_sent_successfully: Envelope has been sent successfully.
+  please_select_at_least_one_template: Please select at least one template.
+  recipient_name: Recipient Name
+  enter_emails_separated_by_comma_or_new_line: Enter emails separated by comma or new line
   event_log: Event Log
   verify: Verify
   testing_log_not_for_production_use: Testing Log - Not for Production Use

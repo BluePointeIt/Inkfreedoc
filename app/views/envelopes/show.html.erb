@@ -1,0 +1,82 @@
+<div class="max-w-4xl mx-auto px-4 py-8">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl md:text-3xl font-bold">
+        <%= @envelope.name.presence || t('envelope') %>
+      </h1>
+      <div class="text-sm text-base-content/60 mt-1">
+        <%= @envelope.created_by_user.full_name %> &middot; <%= l(@envelope.created_at, format: :short) rescue @envelope.created_at.to_date %>
+        &middot; <%= pluralize(@envelope_submissions.size, t('document').downcase) %>
+      </div>
+    </div>
+    <div>
+      <% if @envelope.completed_at? %>
+        <span class="badge badge-success gap-1">
+          <%= svg_icon('circle_check', class: 'w-4 h-4') %>
+          <%= t('completed') %>
+        </span>
+      <% else %>
+        <span class="badge badge-warning gap-1">
+          <%= svg_icon('clock', class: 'w-4 h-4') %>
+          <%= t('pending') %>
+        </span>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="space-y-4">
+    <% @envelope_submissions.each do |submission| %>
+      <div class="border rounded-xl p-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3 min-w-0">
+            <%= svg_icon('files', class: 'w-5 h-5 text-base-content/50 flex-shrink-0') %>
+            <div class="min-w-0">
+              <div class="font-semibold truncate"><%= submission.template&.name || submission.name %></div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <%= link_to submission_path(submission), class: 'btn btn-sm btn-outline gap-1' do %>
+              <%= svg_icon('eye', class: 'w-4 h-4') %>
+              <%= t('view') %>
+            <% end %>
+          </div>
+        </div>
+
+        <div class="mt-3 space-y-2">
+          <% submission.submitters.each do |submitter| %>
+            <div class="flex items-center justify-between text-sm pl-8">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="truncate"><%= submitter.friendly_name %></span>
+                <% if submitter.completed_at? %>
+                  <span class="badge badge-success badge-sm"><%= t('completed') %></span>
+                <% elsif submitter.declined_at? %>
+                  <span class="badge badge-error badge-sm"><%= t('declined') %></span>
+                <% elsif submitter.sent_at? %>
+                  <span class="badge badge-info badge-sm"><%= t('sent') %></span>
+                <% else %>
+                  <span class="badge badge-ghost badge-sm"><%= t('awaiting') %></span>
+                <% end %>
+              </div>
+
+              <% if @envelope.source == 'local' && submitter.completed_at.nil? %>
+                <div class="flex items-center gap-1">
+                  <%= render 'shared/clipboard_copy',
+                             text: submit_form_url(slug: submitter.slug),
+                             icon: 'link',
+                             icon_class: 'w-4 h-4',
+                             class: 'btn btn-sm btn-primary gap-1',
+                             copy_title: t('copy_link'),
+                             copied_title: t('copied') %>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="mt-6">
+    <%= link_to t('back'), root_path, class: 'btn btn-ghost btn-sm' %>
+  </div>
+</div>

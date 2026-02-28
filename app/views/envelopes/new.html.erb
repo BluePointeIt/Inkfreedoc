@@ -1,0 +1,104 @@
+<div class="max-w-3xl mx-auto px-4 py-8">
+  <h1 class="text-2xl md:text-3xl font-bold mb-6"><%= t('new_envelope') %></h1>
+
+  <%= form_with url: envelopes_path, method: :post, class: 'space-y-6' do |f| %>
+    <%# Template Selection %>
+    <div>
+      <label class="label"><span class="label-text font-semibold text-lg"><%= t('select_templates') %></span></label>
+      <div class="mt-2">
+        <input type="text" placeholder="<%= t('search_templates') %>" class="input input-bordered w-full mb-3" data-action="input" id="envelope_template_search">
+      </div>
+      <div class="border rounded-xl max-h-80 overflow-y-auto p-2 space-y-1" id="envelope_template_list">
+        <% @templates.each do |template| %>
+          <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-base-200 cursor-pointer" data-template-name="<%= template.name.downcase %>">
+            <input type="checkbox" name="template_ids[]" value="<%= template.id %>" class="checkbox checkbox-sm">
+            <div class="flex-1 min-w-0">
+              <div class="font-medium truncate"><%= template.name %></div>
+              <div class="text-xs text-base-content/60">
+                <%= template.author&.full_name %> &middot; <%= l(template.created_at.to_date, format: :short) rescue template.created_at.to_date %>
+              </div>
+            </div>
+          </label>
+        <% end %>
+        <% if @templates.empty? %>
+          <div class="text-center py-8 text-base-content/50">
+            <%= t('templates_not_found') %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <%# Recipients - Tab Toggle %>
+    <div>
+      <label class="label"><span class="label-text font-semibold text-lg"><%= t('recipients') %></span></label>
+      <toggle-visible data-element-ids='["envelope_email_tab","envelope_local_tab"]' class="block mt-2">
+        <div class="flex">
+          <span>
+            <input type="radio" name="recipient_mode" value="email" checked class="peer hidden" id="mode_email" data-action="change:toggle-visible#trigger">
+            <label for="mode_email" class="block bg-base-200 text-sm font-semibold whitespace-nowrap py-1.5 px-4 peer-checked:bg-base-300 rounded-l-3xl cursor-pointer">
+              <%= t('via_email') %>
+            </label>
+          </span>
+          <span>
+            <input type="radio" name="recipient_mode" value="local" class="peer hidden" id="mode_local" data-action="change:toggle-visible#trigger" data-toggle-id="envelope_local_tab">
+            <label for="mode_local" class="block bg-base-200 text-sm font-semibold whitespace-nowrap py-1.5 px-4 peer-checked:bg-base-300 rounded-r-3xl cursor-pointer">
+              <%= t('local_in_person') %>
+            </label>
+          </span>
+        </div>
+      </toggle-visible>
+
+      <%# Email Tab %>
+      <div id="envelope_email_tab" class="mt-3 space-y-3">
+        <input type="hidden" name="source" value="invite" id="envelope_source">
+        <div>
+          <label class="label"><span class="label-text"><%= t('email') %></span></label>
+          <textarea name="emails" rows="3" class="textarea textarea-bordered w-full" placeholder="<%= t('enter_emails_separated_by_comma_or_new_line') %>"></textarea>
+        </div>
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" name="send_email" value="1" checked class="checkbox checkbox-sm">
+          <span class="label-text"><%= t('send_email') %></span>
+        </label>
+      </div>
+
+      <%# Local Tab %>
+      <div id="envelope_local_tab" class="mt-3 space-y-3 hidden">
+        <div>
+          <label class="label"><span class="label-text"><%= t('recipient_name') %> (<%= t('optional').downcase %>)</span></label>
+          <input type="text" name="recipient_name" class="input input-bordered w-full" placeholder="<%= t('recipient_name') %>">
+        </div>
+        <p class="text-sm text-base-content/60"><%= t('signing_links_will_be_generated') %></p>
+      </div>
+    </div>
+
+    <%# Envelope Name %>
+    <div>
+      <label class="label"><span class="label-text font-semibold text-lg"><%= t('envelope_name') %> (<%= t('optional').downcase %>)</span></label>
+      <input type="text" name="envelope_name" class="input input-bordered w-full" placeholder="<%= t('envelope_name') %>">
+    </div>
+
+    <%# Submit %>
+    <div class="flex justify-end pt-2">
+      <%= button_tag button_title(title: t('send_envelope'), icon: svg_icon('send', class: 'w-5 h-5')),
+                     type: 'submit', class: 'base-button' %>
+    </div>
+  <% end %>
+</div>
+
+<script>
+  document.getElementById('envelope_template_search')?.addEventListener('input', function(e) {
+    var query = e.target.value.toLowerCase();
+    document.querySelectorAll('#envelope_template_list label[data-template-name]').forEach(function(label) {
+      var name = label.getAttribute('data-template-name');
+      label.style.display = name.includes(query) ? '' : 'none';
+    });
+  });
+
+  document.getElementById('mode_local')?.addEventListener('change', function() {
+    document.getElementById('envelope_source').value = 'local';
+  });
+
+  document.getElementById('mode_email')?.addEventListener('change', function() {
+    document.getElementById('envelope_source').value = 'invite';
+  });
+</script>
