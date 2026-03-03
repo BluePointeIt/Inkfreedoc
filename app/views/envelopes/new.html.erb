@@ -56,7 +56,11 @@
       <div id="envelope_email_tab" class="mt-3 space-y-3">
         <input type="hidden" name="source" value="invite" id="envelope_source">
         <div id="envelope_role_fields" class="space-y-4">
-          <p class="text-sm text-base-content/50"><%= t('select_templates_to_assign_recipients') %></p>
+          <div class="card card-compact bg-base-300/40">
+            <div class="card-body">
+              <p class="text-sm text-base-content/50 text-center py-4"><%= t('select_templates_to_assign_recipients') %></p>
+            </div>
+          </div>
         </div>
         <label class="flex items-center gap-2 cursor-pointer">
           <input type="checkbox" name="send_email" value="1" checked class="checkbox checkbox-sm">
@@ -111,6 +115,12 @@
     return div.innerHTML;
   }
 
+  function ordinal(n) {
+    var s = ['th', 'st', 'nd', 'rd'];
+    var v = n % 100;
+    return n + (s[(v - 20) % 10] || s[v] || s[0]);
+  }
+
   function rebuildRoleFields() {
     var container = document.getElementById('envelope_role_fields');
     if (!container) return;
@@ -118,7 +128,9 @@
     var checked = document.querySelectorAll('.template-checkbox:checked');
 
     if (checked.length === 0) {
-      container.innerHTML = '<p class="text-sm text-base-content/50"><%= t("select_templates_to_assign_recipients") %></p>';
+      container.innerHTML = '<div class="card card-compact bg-base-300/40"><div class="card-body">' +
+        '<p class="text-sm text-base-content/50 text-center py-4"><%= t("select_templates_to_assign_recipients") %></p>' +
+        '</div></div>';
       return;
     }
 
@@ -128,27 +140,42 @@
       var templateId = label.getAttribute('data-template-id');
       var templateName = label.getAttribute('data-template-label');
       var submitters = JSON.parse(label.getAttribute('data-submitters') || '[]');
-      var multiRole = submitters.length > 1;
 
       html += '<div class="card card-compact bg-base-300/40">';
-      html += '<div class="card-body">';
-      html += '<div class="text-sm font-semibold mb-1">' + escapeHtml(templateName) + '</div>';
-      html += '<div class="grid ' + (multiRole ? 'md:grid-cols-2' : '') + ' gap-4">';
+      html += '<div class="card-body space-y-3">';
+      html += '<div class="font-semibold">' + escapeHtml(templateName) + '</div>';
 
       submitters.forEach(function(sub, index) {
         var nameField = 'submitters[' + templateId + '][' + sub.uuid + '][name]';
         var emailField = 'submitters[' + templateId + '][' + sub.uuid + '][email]';
+        var roleName = sub.name || 'Signer';
+        var signerLabel = ordinal(index + 1) + ' Signer';
 
-        html += '<div class="form-control">';
-        if (multiRole) {
-          html += '<label class="label pt-0 pb-1"><span class="label-text">' + escapeHtml(sub.name || 'Signer') + '</span></label>';
-        }
-        html += '<input type="text" name="' + nameField + '" autocomplete="off" class="base-input !h-10 w-full" placeholder="<%= t("name") %>">';
-        html += '<input type="email" name="' + emailField + '" autocomplete="off" class="base-input !h-10 mt-1.5 w-full" placeholder="<%= t("email") %>" required>';
+        html += '<div class="flex gap-3 items-start">';
+
+        // Numbered badge
+        html += '<div class="flex-shrink-0 pt-1">';
+        html += '<span class="badge badge-primary badge-lg font-bold w-8 h-8">' + (index + 1) + '</span>';
         html += '</div>';
+
+        // Input fields
+        html += '<div class="flex-1 space-y-1.5">';
+        html += '<div class="flex items-center gap-2">';
+        html += '<span class="text-sm font-semibold">' + escapeHtml(roleName) + '</span>';
+        html += '<span class="text-xs text-base-content/50">' + signerLabel + '</span>';
+        html += '</div>';
+        html += '<input type="text" name="' + nameField + '" autocomplete="off" class="base-input !h-10 w-full" placeholder="<%= t("name") %>">';
+        html += '<input type="email" name="' + emailField + '" autocomplete="off" class="base-input !h-10 w-full" placeholder="<%= t("email") %>" required>';
+        html += '</div>';
+
+        html += '</div>';
+
+        // Divider between signers (not after last)
+        if (index < submitters.length - 1) {
+          html += '<div class="divider my-0"></div>';
+        }
       });
 
-      html += '</div>';
       html += '</div>';
       html += '</div>';
     });
