@@ -97,8 +97,8 @@
           </span>
         <% end %>
       <% end %>
-      <% if Docuseal.multitenant? && !request.path.in?([registration_path, new_registration_path]) %>
-        <%= link_to registration_path({ lang: params[:lang] }.compact_blank), class: 'btn btn-neutral btn-sm btn-outline' do %>
+      <% if Docuseal.multitenant? && !request.path.in?([user_registration_path, new_user_registration_path]) %>
+        <%= link_to new_user_registration_path({ lang: params[:lang] }.compact_blank), class: 'btn btn-neutral btn-sm btn-outline' do %>
           <span class="flex items-center justify-center space-x-1">
             <span class="hidden sm:block capitalize"><%= t('create_free_account') %></span>
             <span class="md:hidden"><%= t('sign_up') %></span>
