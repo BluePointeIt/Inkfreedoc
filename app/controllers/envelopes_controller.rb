@@ -99,7 +99,7 @@ class EnvelopesController < ApplicationController
       template: template,
       user: current_user,
       source: :invite,
-      submitters_order: 'preserved',
+      submitters_order: 'random',
       submissions_attrs: submissions_attrs,
       params: { 'send_completed_email' => true, 'send_email' => envelope.send_email.to_s }
     )
