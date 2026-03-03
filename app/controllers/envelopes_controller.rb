@@ -41,6 +41,8 @@ class EnvelopesController < ApplicationController
       submissions =
         if source == 'local'
           build_local_submissions(template, envelope, params[:recipient_name])
+        elsif params[:submitters].present? && params[:submitters][template.id.to_s].present?
+          build_email_submissions_with_roles(template, envelope, params[:submitters][template.id.to_s])
         else
           build_email_submissions(template, envelope, params[:emails])
         end
@@ -77,6 +79,32 @@ class EnvelopesController < ApplicationController
 
     submissions.each { |s| s.update!(envelope: envelope) }
 
+    submissions
+  end
+
+  def build_email_submissions_with_roles(template, envelope, submitters_params)
+    submissions_attrs = [{
+      submitters: template.submitters.map do |ts|
+        submitter_data = submitters_params[ts['uuid']] || {}
+        {
+          uuid: ts['uuid'],
+          role: ts['name'],
+          email: submitter_data['email'].presence,
+          name: submitter_data['name'].presence
+        }
+      end
+    }]
+
+    submissions = Submissions.create_from_submitters(
+      template: template,
+      user: current_user,
+      source: :invite,
+      submitters_order: 'preserved',
+      submissions_attrs: submissions_attrs,
+      params: { 'send_completed_email' => true, 'send_email' => envelope.send_email.to_s }
+    )
+
+    submissions.each { |s| s.update!(envelope: envelope) }
     submissions
   end
 

@@ -10,8 +10,12 @@
       </div>
       <div class="border rounded-xl max-h-80 overflow-y-auto p-2 space-y-1" id="envelope_template_list">
         <% @templates.each do |template| %>
-          <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-base-200 cursor-pointer" data-template-name="<%= template.name.downcase %>">
-            <input type="checkbox" name="template_ids[]" value="<%= template.id %>" class="checkbox checkbox-sm">
+          <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-base-200 cursor-pointer"
+                 data-template-name="<%= template.name.downcase %>"
+                 data-template-id="<%= template.id %>"
+                 data-template-label="<%= template.name %>"
+                 data-submitters="<%= template.submitters.to_json %>">
+            <input type="checkbox" name="template_ids[]" value="<%= template.id %>" class="checkbox checkbox-sm template-checkbox">
             <div class="flex-1 min-w-0">
               <div class="font-medium truncate"><%= template.name %></div>
               <div class="text-xs text-base-content/60">
@@ -51,9 +55,8 @@
       <%# Email Tab %>
       <div id="envelope_email_tab" class="mt-3 space-y-3">
         <input type="hidden" name="source" value="invite" id="envelope_source">
-        <div>
-          <label class="label"><span class="label-text"><%= t('email') %></span></label>
-          <textarea name="emails" rows="3" class="textarea textarea-bordered w-full" placeholder="<%= t('enter_emails_separated_by_comma_or_new_line') %>"></textarea>
+        <div id="envelope_role_fields">
+          <p class="text-sm text-base-content/50"><%= t('select_templates_to_assign_recipients') %></p>
         </div>
         <label class="flex items-center gap-2 cursor-pointer">
           <input type="checkbox" name="send_email" value="1" checked class="checkbox checkbox-sm">
@@ -100,5 +103,55 @@
 
   document.getElementById('mode_email')?.addEventListener('change', function() {
     document.getElementById('envelope_source').value = 'invite';
+  });
+
+  function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+  }
+
+  function rebuildRoleFields() {
+    var container = document.getElementById('envelope_role_fields');
+    if (!container) return;
+
+    var checked = document.querySelectorAll('.template-checkbox:checked');
+
+    if (checked.length === 0) {
+      container.innerHTML = '<p class="text-sm text-base-content/50"><%= t("select_templates_to_assign_recipients") %></p>';
+      return;
+    }
+
+    var html = '';
+    checked.forEach(function(cb) {
+      var label = cb.closest('label');
+      var templateId = label.getAttribute('data-template-id');
+      var templateName = label.getAttribute('data-template-label');
+      var submitters = JSON.parse(label.getAttribute('data-submitters') || '[]');
+
+      html += '<div class="border rounded-xl p-4 space-y-3">';
+      html += '<div class="font-semibold text-sm">' + escapeHtml(templateName) + '</div>';
+
+      submitters.forEach(function(sub) {
+        var nameField = 'submitters[' + templateId + '][' + sub.uuid + '][name]';
+        var emailField = 'submitters[' + templateId + '][' + sub.uuid + '][email]';
+
+        html += '<div class="pl-2 border-l-2 border-base-300 space-y-1">';
+        html += '<div class="text-xs font-medium text-base-content/70">' + escapeHtml(sub.name || 'Signer') + '</div>';
+        html += '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">';
+        html += '<input type="text" name="' + nameField + '" class="input input-bordered input-sm w-full" placeholder="<%= t("name") %>">';
+        html += '<input type="email" name="' + emailField + '" class="input input-bordered input-sm w-full" placeholder="<%= t("email") %>" required>';
+        html += '</div>';
+        html += '</div>';
+      });
+
+      html += '</div>';
+    });
+
+    container.innerHTML = html;
+  }
+
+  document.querySelectorAll('.template-checkbox').forEach(function(cb) {
+    cb.addEventListener('change', rebuildRoleFields);
   });
 </script>

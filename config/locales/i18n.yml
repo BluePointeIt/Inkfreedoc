@@ -670,6 +670,7 @@ en: &en
   send_envelope: Send Envelope
   envelope_sent_successfully: Envelope has been sent successfully.
   please_select_at_least_one_template: Please select at least one template.
+  select_templates_to_assign_recipients: Select templates above to assign recipients to each signer role.
   recipient_name: Recipient Name
   enter_emails_separated_by_comma_or_new_line: Enter emails separated by comma or new line
   event_log: Event Log
