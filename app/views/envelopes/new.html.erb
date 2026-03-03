@@ -55,7 +55,7 @@
       <%# Email Tab %>
       <div id="envelope_email_tab" class="mt-3 space-y-3">
         <input type="hidden" name="source" value="invite" id="envelope_source">
-        <div id="envelope_role_fields">
+        <div id="envelope_role_fields" class="space-y-4">
           <p class="text-sm text-base-content/50"><%= t('select_templates_to_assign_recipients') %></p>
         </div>
         <label class="flex items-center gap-2 cursor-pointer">
@@ -128,23 +128,28 @@
       var templateId = label.getAttribute('data-template-id');
       var templateName = label.getAttribute('data-template-label');
       var submitters = JSON.parse(label.getAttribute('data-submitters') || '[]');
+      var multiRole = submitters.length > 1;
 
-      html += '<div class="border rounded-xl p-4 space-y-3">';
-      html += '<div class="font-semibold text-sm">' + escapeHtml(templateName) + '</div>';
+      html += '<div class="card card-compact bg-base-300/40">';
+      html += '<div class="card-body">';
+      html += '<div class="text-sm font-semibold mb-1">' + escapeHtml(templateName) + '</div>';
+      html += '<div class="grid ' + (multiRole ? 'md:grid-cols-2' : '') + ' gap-4">';
 
-      submitters.forEach(function(sub) {
+      submitters.forEach(function(sub, index) {
         var nameField = 'submitters[' + templateId + '][' + sub.uuid + '][name]';
         var emailField = 'submitters[' + templateId + '][' + sub.uuid + '][email]';
 
-        html += '<div class="pl-2 border-l-2 border-base-300 space-y-1">';
-        html += '<div class="text-xs font-medium text-base-content/70">' + escapeHtml(sub.name || 'Signer') + '</div>';
-        html += '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">';
-        html += '<input type="text" name="' + nameField + '" class="input input-bordered input-sm w-full" placeholder="<%= t("name") %>">';
-        html += '<input type="email" name="' + emailField + '" class="input input-bordered input-sm w-full" placeholder="<%= t("email") %>" required>';
-        html += '</div>';
+        html += '<div class="form-control">';
+        if (multiRole) {
+          html += '<label class="label pt-0 pb-1"><span class="label-text">' + escapeHtml(sub.name || 'Signer') + '</span></label>';
+        }
+        html += '<input type="text" name="' + nameField + '" autocomplete="off" class="base-input !h-10 w-full" placeholder="<%= t("name") %>">';
+        html += '<input type="email" name="' + emailField + '" autocomplete="off" class="base-input !h-10 mt-1.5 w-full" placeholder="<%= t("email") %>" required>';
         html += '</div>';
       });
 
+      html += '</div>';
+      html += '</div>';
       html += '</div>';
     });
 
