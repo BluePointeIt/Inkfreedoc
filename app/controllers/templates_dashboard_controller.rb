@@ -84,7 +84,7 @@ class TemplatesDashboardController < ApplicationController
                                      .left_joins(:template)
                                      .where(archived_at: nil)
                                      .where(templates: { archived_at: nil })
-                                     .preload(:template_accesses, :created_by_user,
+                                     .preload(:envelope, :template_accesses, :created_by_user,
                                               template: :author,
                                               submitters: :start_form_submission_events)
 
