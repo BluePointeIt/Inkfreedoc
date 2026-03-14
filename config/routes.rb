@@ -54,6 +54,7 @@ Rails.application.routes.draw do
     resources :submitter_email_clicks, only: %i[create]
     resources :submitter_form_views, only: %i[create]
     resources :submitters, only: %i[index show update]
+    post 'submitters/:id/send_email', to: 'submitter_send_email#create', as: :submitter_send_email
     resources :submissions, only: %i[index show create destroy] do
       resources :documents, only: %i[index], controller: 'submission_documents'
       resource :audit_trail, only: %i[show], controller: 'submission_audit_trails'
@@ -118,6 +119,12 @@ Rails.application.routes.draw do
   resources :folders, only: %i[show edit update destroy], controller: 'template_folders'
   resources :template_sharings_testing, only: %i[create]
   resources :templates, only: %i[index], controller: 'templates_dashboard'
+  resources :pending_submissions, only: %i[index edit update] do
+    collection do
+      get :send_form
+      post :send_signing
+    end
+  end
   resources :submissions_filters, only: %i[show], param: 'name'
   resources :templates, only: %i[new create edit update show destroy] do
     resources :clone, only: %i[new create], controller: 'templates_clone'
@@ -128,6 +135,7 @@ Rails.application.routes.draw do
     resources :restore, only: %i[create], controller: 'templates_restore'
     resources :archived, only: %i[index], controller: 'templates_archived_submissions'
     resources :submissions, only: %i[new create]
+    resources :quick_start, only: %i[new create], controller: 'template_quick_start'
     resource :folder, only: %i[edit update], controller: 'templates_folders'
     resource :preview, only: %i[show], controller: 'templates_preview'
     resource :form, only: %i[show], controller: 'templates_form_preview'

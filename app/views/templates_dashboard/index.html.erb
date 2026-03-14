@@ -27,6 +27,10 @@
         <%= render 'shared/search_input' %>
       <% end %>
       <% if can?(:create, Submission) %>
+        <%= link_to pending_submissions_path, class: 'white-button !border gap-2' do %>
+          <%= svg_icon('clock', class: 'w-6 h-6 stroke-2') %>
+          <span class="hidden md:block"><%= t('pending') %></span>
+        <% end %>
         <%= link_to new_envelope_path, class: 'white-button !border gap-2' do %>
           <%= svg_icon('files', class: 'w-6 h-6 stroke-2') %>
           <span class="hidden md:block"><%= t('new_envelope') %></span>

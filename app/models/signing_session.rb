@@ -34,7 +34,7 @@ class SigningSession < ApplicationRecord
   end
 
   def all_signed?
-    submission.submitters.where(completed_at: nil).none?
+    submission.submitters.where(required: true, completed_at: nil).none?
   end
 
   def in_person?

@@ -1,4 +1,4 @@
-<% account = @template.account %>
+<% account = @template&.account || @submitter&.account %>
 <% if account.logo.attached? %>
   <a href="/" class="flex justify-center items-center">
     <span class="mr-3">

@@ -1,0 +1,75 @@
+<%= render 'shared/turbo_modal', title: t('edit_pending_document') do %>
+  <div class="px-5 mb-5 mt-4">
+    <div class="mb-4 p-3 bg-base-300/40 rounded-lg">
+      <div class="flex items-center gap-2 text-sm text-base-content/70">
+        <%= svg_icon('file_text', class: 'w-4 h-4') %>
+        <span class="font-medium"><%= @submission.template.name %></span>
+      </div>
+    </div>
+    <%= form_for @submitter, url: pending_submission_path(@submitter), method: :patch, html: { class: 'space-y-4' } do |f| %>
+      <div class="form-control">
+        <label class="label pb-1">
+          <span class="label-text font-semibold"><%= t('resident_name') %></span>
+        </label>
+        <%= f.text_field :name, class: 'base-input w-full', placeholder: t('enter_resident_name'), required: true, autofocus: true, dir: 'auto' %>
+      </div>
+      <div class="form-control">
+        <label class="label pb-1">
+          <span class="label-text font-semibold"><%= t('email') %> <span class="text-base-content/50">(<%= t('optional').downcase %>)</span></span>
+        </label>
+        <%= f.email_field :email, class: 'base-input w-full', placeholder: t('email'), dir: 'auto' %>
+      </div>
+      <div class="form-control">
+        <label class="label pb-1">
+          <span class="label-text font-semibold"><%= t('phone') %> <span class="text-base-content/50">(<%= t('optional').downcase %>)</span></span>
+        </label>
+        <%= f.phone_field :phone, class: 'base-input w-full', placeholder: t('phone'), dir: 'auto' %>
+      </div>
+      <div class="flex gap-3">
+        <div class="form-control flex-1">
+          <label class="label pb-1">
+            <span class="label-text font-semibold"><%= t('day') %></span>
+          </label>
+          <input type="number" name="submitter[metadata][day]" value="<%= @submitter.metadata['day'] %>" class="base-input w-full" placeholder="<%= t('day') %>" min="1" max="31">
+        </div>
+        <div class="form-control flex-1">
+          <label class="label pb-1">
+            <span class="label-text font-semibold"><%= t('month') %></span>
+          </label>
+          <select name="submitter[metadata][month]" class="base-input w-full">
+            <option value=""><%= t('select_month') %></option>
+            <% (1..12).each do |m| %>
+              <option value="<%= m %>" <%= 'selected' if @submitter.metadata['month'].to_s == m.to_s %>><%= t('date.month_names')[m] %></option>
+            <% end %>
+          </select>
+        </div>
+      </div>
+      <div class="form-control">
+        <label class="label pb-1">
+          <span class="label-text font-semibold"><%= t('daily_rate') %></span>
+        </label>
+        <div class="relative">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/50">$</span>
+          <input type="number" name="submitter[metadata][daily_rate]" value="<%= @submitter.metadata['daily_rate'] %>" class="base-input w-full pl-7" placeholder="0.00" step="0.01" min="0">
+        </div>
+      </div>
+      <button type="submit" class="base-button w-full gap-1">
+        <%= svg_icon('device_floppy', class: 'w-5 h-5') %>
+        <span><%= t('save') %></span>
+      </button>
+    <% end %>
+    <div class="divider text-sm text-base-content/50"><%= t('or') %></div>
+    <div class="flex gap-2">
+      <a href="<%= send_signing_pending_submissions_path(id: @submitter.id, send_method: 'in_person') %>" class="btn btn-neutral flex-1 gap-1 text-white" data-turbo-method="post">
+        <%= svg_icon('writing', class: 'w-5 h-5') %>
+        <span><%= t('sign_in_person') %></span>
+      </a>
+      <% if @submitter.email.present? %>
+        <a href="<%= send_signing_pending_submissions_path(id: @submitter.id, send_method: 'email') %>" class="btn btn-outline flex-1 gap-1" data-turbo-method="post">
+          <%= svg_icon('mail_forward', class: 'w-5 h-5') %>
+          <span><%= t('send_by_email') %></span>
+        </a>
+      <% end %>
+    </div>
+  </div>
+<% end %>

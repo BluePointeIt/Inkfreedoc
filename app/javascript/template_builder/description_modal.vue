@@ -67,7 +67,7 @@
 <script>
 export default {
   name: 'DescriptionModal',
-  inject: ['t', 'template'],
+  inject: ['t', 'template', 'save'],
   props: {
     field: {
       type: Object,
@@ -103,6 +103,7 @@ export default {
       this.field.description = this.description
       this.field.title = this.title
 
+      this.save()
       this.$emit('save')
       this.$emit('close')
     },

@@ -1,0 +1,35 @@
+<%= render 'shared/turbo_modal', title: t('new_signing') do %>
+  <div class="px-5 mb-5 mt-4 space-y-4">
+    <form action="<%= template_quick_start_index_path(@template) %>" method="post" id="qs_form" data-turbo="false">
+      <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+      <input type="hidden" name="mode" id="qs_mode" value="pending">
+      <div class="form-control mb-4">
+        <label class="label pb-1">
+          <span class="label-text font-semibold"><%= t('resident_name') %></span>
+        </label>
+        <input type="text" name="name" class="base-input w-full" placeholder="<%= t('enter_resident_name') %>" required autofocus dir="auto">
+      </div>
+      <div class="form-control mb-4">
+        <label class="label pb-1">
+          <span class="label-text font-semibold"><%= t('email') %> <span class="text-base-content/50">(<%= t('optional').downcase %>)</span></span>
+        </label>
+        <input type="email" name="email" class="base-input w-full" placeholder="<%= t('email') %>" dir="auto">
+      </div>
+      <div class="flex gap-2">
+        <button type="submit" class="base-button flex-1 gap-1" onclick="document.getElementById('qs_mode').value='pending'">
+          <%= svg_icon('clock', class: 'w-5 h-5') %>
+          <span><%= t('save_as_pending') %></span>
+        </button>
+        <button type="submit" class="btn btn-neutral flex-1 gap-1 text-white" onclick="document.getElementById('qs_mode').value='sign'">
+          <%= svg_icon('writing', class: 'w-5 h-5') %>
+          <span><%= t('start_signing') %></span>
+        </button>
+      </div>
+    </form>
+    <div class="divider text-sm text-base-content/50"><%= t('or') %></div>
+    <a href="<%= edit_template_path(@template) %>" class="btn btn-outline w-full gap-1" data-turbo-frame="_top">
+      <%= svg_icon('file_text', class: 'w-5 h-5') %>
+      <span><%= t('edit_document') %></span>
+    </a>
+  </div>
+<% end %>

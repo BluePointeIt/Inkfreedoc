@@ -36,7 +36,7 @@
   <% end %>
   <div class="w-full flex flex-col md:flex-row space-y-4 md:space-y-0 md:justify-between px-5 md:px-6 pb-5 md:items-center pt-5 relative cursor-pointer">
     <% submitters = (submission.template_submitters || submission.template&.submitters || []).filter_map { |item| submission.submitters.find { |e| e.uuid == item['uuid'] } } %>
-    <% is_submission_completed = submitters.all?(&:completed_at?) && submitters.size.positive? %>
+    <% is_submission_completed = submitters.select(&:required?).all?(&:completed_at?) && submitters.size.positive? %>
     <% if submitters.size == 1 %>
       <div>
         <% submitter = submitters.first %>
@@ -104,6 +104,17 @@
             </div>
           <% end %>
         <% end %>
+        <span data-tip="<%= submission.audit_trail.present? ? t('audit_log') : t('event_log') %>" class="sm:tooltip tooltip-top z-[1]">
+          <% if submission.audit_trail.present? %>
+            <a href="<%= ActiveStorage::Blob.proxy_url(submission.audit_trail.blob, expires_at: 4.hours.from_now) %>" class="btn btn-outline btn-sm w-full md:w-fit" target="_blank">
+              <%= svg_icon('external_link', class: 'w-5 h-5') %>
+            </a>
+          <% else %>
+            <%= link_to submission_events_path(submission), class: 'btn btn-outline btn-sm w-full md:w-fit', data: { turbo_frame: :modal } do %>
+              <%= svg_icon('logs', class: 'w-5 h-5') %>
+            <% end %>
+          <% end %>
+        </span>
         <div class="flex-1 md:flex-none z-[1]">
           <a href="<%= submission_path(submission) %>" class="btn btn-outline btn-sm w-full md:w-24">
             <%= t('view') %>
@@ -211,6 +222,17 @@
             </div>
           </div>
         <% end %>
+        <span data-tip="<%= submission.audit_trail.present? ? t('audit_log') : t('event_log') %>" class="sm:tooltip tooltip-top z-[1]">
+          <% if submission.audit_trail.present? %>
+            <a href="<%= ActiveStorage::Blob.proxy_url(submission.audit_trail.blob, expires_at: 4.hours.from_now) %>" class="btn btn-outline btn-sm w-full md:w-fit" target="_blank">
+              <%= svg_icon('external_link', class: 'w-5 h-5') %>
+            </a>
+          <% else %>
+            <%= link_to submission_events_path(submission), class: 'btn btn-outline btn-sm w-full md:w-fit', data: { turbo_frame: :modal } do %>
+              <%= svg_icon('logs', class: 'w-5 h-5') %>
+            <% end %>
+          <% end %>
+        </span>
         <div class="flex-1 md:flex-none z-[1]">
           <a href="<%= submission_path(submission) %>" class="btn btn-outline btn-sm w-full md:w-24">
             <%= t('view') %>

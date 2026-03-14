@@ -50,6 +50,7 @@ const en = {
   start_now: 'Start Now',
   continue: 'Continue',
   sign_now: 'Sign Now',
+  signer: 'Signer',
   type_here_: 'Type here...',
   optional: 'optional',
   option: 'Option',

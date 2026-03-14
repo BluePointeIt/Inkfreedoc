@@ -23,7 +23,7 @@ class SubmissionsController < ApplicationController
   def show
     @submission = Submissions.preload_with_pages(@submission)
 
-    unless @submission.submitters.all?(&:completed_at?)
+    unless @submission.submitters.select(&:required?).all?(&:completed_at?)
       ActiveRecord::Associations::Preloader.new(
         records: [@submission],
         associations: [submitters: :start_form_submission_events]
@@ -105,7 +105,7 @@ class SubmissionsController < ApplicationController
   end
 
   def submissions_params
-    params.permit(submission: { submitters: [:uuid, :email, :phone, :name, { values: {} }] })
+    params.permit(submission: { submitters: [:uuid, :email, :phone, :name, :required, { values: {} }] })
   end
 
   def load_template

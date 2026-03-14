@@ -1,0 +1,126 @@
+<div class="flex justify-between items-center mb-6">
+  <h1 class="text-3xl font-bold"><%= t('pending_documents') %></h1>
+  <a href="<%= root_path %>" class="white-button !border gap-2">
+    <%= svg_icon('arrow_left', class: 'w-5 h-5') %>
+    <span><%= t('back_to_templates') %></span>
+  </a>
+</div>
+
+<% if flash[:notice] %>
+  <div class="alert alert-success mb-4">
+    <span><%= flash[:notice] %></span>
+  </div>
+<% end %>
+
+<% if flash[:alert] %>
+  <div class="alert alert-error mb-4">
+    <span><%= flash[:alert] %></span>
+  </div>
+<% end %>
+
+<% if @submissions.present? %>
+  <div class="space-y-3">
+    <% @submissions.each do |submission| %>
+      <% submitter = submission.submitters.first %>
+      <% template_submitters_list = submission.template&.submitters || [] %>
+      <div class="card bg-base-200">
+        <div class="card-body p-4">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="badge badge-warning badge-sm"><%= t('pending') %></span>
+                <span class="font-semibold text-lg truncate"><%= submitter&.name || t('unnamed') %></span>
+              </div>
+              <div class="flex items-center gap-4 mt-1 text-sm text-base-content/60">
+                <span class="flex items-center gap-1">
+                  <%= svg_icon('file_text', class: 'w-4 h-4') %>
+                  <%= submission.template&.name || t('unnamed') %>
+                </span>
+                <% if submitter&.email.present? %>
+                  <span class="flex items-center gap-1">
+                    <%= svg_icon('mail', class: 'w-4 h-4') %>
+                    <%= submitter.email %>
+                  </span>
+                <% end %>
+                <span class="flex items-center gap-1">
+                  <%= svg_icon('calendar', class: 'w-4 h-4') %>
+                  <%= l(submission.created_at.in_time_zone(current_account.timezone), format: :short, locale: current_account.locale) %>
+                </span>
+              </div>
+              <% if submission.submitters.size > 1 %>
+                <div class="flex flex-wrap gap-2 mt-2">
+                  <% submission.submitters.order(:created_at).each do |s| %>
+                    <% party_name = template_submitters_list.find { |ts| ts['uuid'] == s.uuid }&.dig('name') %>
+                    <% if s.completed_at? %>
+                      <span class="badge badge-sm gap-1 bg-emerald-100 border-emerald-300 text-emerald-800">
+                        <%= svg_icon('user', class: 'w-3 h-3') %>
+                        <%= party_name || s.name || t('unnamed') %>
+                        <span>&check;</span>
+                      </span>
+                    <% elsif s.declined_at? %>
+                      <span class="badge badge-sm gap-1 bg-red-100 border-red-300 text-red-800">
+                        <%= svg_icon('user', class: 'w-3 h-3') %>
+                        <%= party_name || s.name || t('unnamed') %>
+                        <span>&times;</span>
+                      </span>
+                    <% else %>
+                      <span class="badge badge-sm gap-1 bg-amber-100 border-amber-300 text-amber-800">
+                        <%= svg_icon('user', class: 'w-3 h-3') %>
+                        <%= party_name || s.name || t('unnamed') %>
+                        <span class="loading loading-dots loading-xs"></span>
+                      </span>
+                    <% end %>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 flex-shrink-0">
+              <a href="<%= edit_pending_submission_path(submitter) %>" class="btn btn-sm btn-primary gap-1" data-turbo-frame="modal">
+                <%= svg_icon('pencil', class: 'w-4 h-4') %>
+                <span><%= t('edit') %></span>
+              </a>
+              <% if submission.template %>
+              <a href="<%= edit_template_path(submission.template) %>" class="btn btn-sm btn-outline gap-1">
+                <%= svg_icon('file_text', class: 'w-4 h-4') %>
+                <span><%= t('edit_document') %></span>
+              </a>
+              <% end %>
+              <a href="<%= send_signing_pending_submissions_path(id: submitter.id, send_method: 'in_person') %>" class="btn btn-sm btn-neutral gap-1" data-turbo-method="post">
+                <%= svg_icon('writing', class: 'w-4 h-4') %>
+                <span><%= t('sign_in_person') %></span>
+              </a>
+              <% if submission.audit_trail.present? %>
+                <a href="<%= ActiveStorage::Blob.proxy_url(submission.audit_trail.blob, expires_at: 4.hours.from_now) %>" class="btn btn-sm btn-outline gap-1" target="_blank">
+                  <%= svg_icon('external_link', class: 'w-4 h-4') %>
+                  <span><%= t('audit_log') %></span>
+                </a>
+              <% else %>
+                <%= link_to submission_events_path(submission), class: 'btn btn-sm btn-outline gap-1', data: { turbo_frame: :modal } do %>
+                  <%= svg_icon('logs', class: 'w-4 h-4') %>
+                  <span><%= t('event_log') %></span>
+                <% end %>
+              <% end %>
+              <a href="<%= send_form_pending_submissions_path(id: submission.id) %>" class="white-button !py-1 !px-3 !text-sm gap-1" data-turbo-frame="modal">
+                <%= svg_icon('send', class: 'w-4 h-4') %>
+                <span><%= t('send_email') %></span>
+              </a>
+              <%= button_to submission_path(submission), method: :delete, class: 'btn btn-sm btn-ghost btn-circle', data: { turbo_confirm: t('are_you_sure') } do %>
+                <%= svg_icon('trash', class: 'w-4 h-4') %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+  <% if @pagy.pages > 1 %>
+    <%= render 'shared/pagination', pagy: @pagy, items_name: 'submissions' %>
+  <% end %>
+<% else %>
+  <div class="card bg-base-200">
+    <div class="card-body text-center py-16">
+      <p class="text-2xl font-bold"><%= t('no_pending_documents') %></p>
+      <p class="mt-2 text-base-content/60"><%= t('pending_documents_will_appear_here') %></p>
+    </div>
+  </div>
+<% end %>

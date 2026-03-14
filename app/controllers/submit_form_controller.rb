@@ -19,6 +19,8 @@ class SubmitFormController < ApplicationController
     return render :email_2fa unless Submitters::AuthorizedForForm.pass_email_2fa?(@submitter, request)
     return redirect_to submit_form_completed_path(@submitter.slug) if @submitter.completed_at?
 
+    sync_missing_parties(submission)
+
     @form_configs = Submitters::FormConfigs.call(@submitter, CONFIG_KEYS)
 
     return render :awaiting if (@form_configs[:enforce_signing_order] ||
@@ -95,6 +97,33 @@ class SubmitFormController < ApplicationController
 
   def load_submitter
     @submitter = Submitter.find_by!(slug: params[:slug] || params[:submit_form_slug])
+  end
+
+  def sync_missing_parties(submission)
+    template = submission.template
+    return unless template
+
+    template_submitters = template.submitters.reject { |e| e['invite_by_uuid'].present? }
+    existing_uuids = submission.submitters.pluck(:uuid)
+
+    new_submitters = template_submitters.reject { |ts| existing_uuids.include?(ts['uuid']) }
+    return if new_submitters.empty?
+
+    new_submitters.each do |ts|
+      submission.submitters.create!(
+        uuid: ts['uuid'],
+        account_id: submission.account_id,
+        email: ts['email'].presence,
+        name: ts['name'].presence
+      )
+    end
+
+    # Update template_submitters and clear cached template_fields
+    updates = { template_submitters: template.submitters }
+    updates[:template_fields] = nil if submission.template_fields.present?
+    submission.update!(updates)
+
+    submission.submitters.reload
   end
 
   def build_attachments_index(submission)

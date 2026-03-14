@@ -19,6 +19,7 @@ class TemplatesArchivedController < ApplicationController
                 .joins(:template)
                 .where.not(templates: { archived_at: nil })
                 .preload(:template_accesses, :created_by_user,
+                         :audit_trail_attachment,
                          template: :author,
                          submitters: :start_form_submission_events)
 

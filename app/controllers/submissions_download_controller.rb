@@ -74,7 +74,7 @@ class SubmissionsDownloadController < ApplicationController
   end
 
   def build_combined_url(submitter)
-    return if submitter.submission.submitters.exists?(completed_at: nil)
+    return if submitter.submission.submitters.where(required: true).exists?(completed_at: nil)
     return if submitter.submission.submitters.order(:completed_at).last != submitter
 
     attachment = submitter.submission.combined_document_attachment

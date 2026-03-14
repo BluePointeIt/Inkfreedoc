@@ -1,6 +1,6 @@
 <template>
   <label
-    v-if="showFieldNames && (field.name || field.title)"
+    v-if="showFieldNames && (field.name || field.title || field.description)"
     :for="field.uuid"
     dir="auto"
     class="label text-xl sm:text-2xl py-0 mb-2 sm:mb-3.5 field-name-label"
@@ -10,9 +10,9 @@
       v-if="field.title"
       :string="field.title"
     />
-    <template v-else>{{ field.name }}</template>
+    <template v-else-if="field.name">{{ field.name }}</template>
     <template v-if="!field.required">
-      <span :class="{ 'hidden sm:inline': (field.title || field.name).length > 20 }">
+      <span :class="{ 'hidden sm:inline': (field.title || field.name || '').length > 20 }">
         ({{ t('optional') }})
       </span>
     </template>

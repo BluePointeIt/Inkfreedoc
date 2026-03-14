@@ -37,7 +37,7 @@ module Submissions
         json['fields'] = submission.template_fields || submission.template&.fields
       end
 
-      if submitters.all?(&:completed_at?)
+      if submitters.select(&:required?).all?(&:completed_at?)
         last_submitter = submitters.max_by(&:completed_at)
 
         if with_documents
@@ -73,7 +73,7 @@ module Submissions
     end
 
     def maybe_build_combined_url(submitters, submission, params, expires_at: nil)
-      return unless submitters.all?(&:completed_at?)
+      return unless submitters.select(&:required?).all?(&:completed_at?)
 
       attachment = submission.combined_document_attachment
 

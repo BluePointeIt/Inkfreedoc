@@ -84,11 +84,13 @@ class Submission < ApplicationRecord
   scope :pending, lambda {
     where(expire_at: nil).or(where(expire_at: Time.current..))
                          .where(Submitter.where(Submitter.arel_table[:submission_id].eq(Submission.arel_table[:id])
-                                         .and(Submitter.arel_table[:completed_at].eq(nil))).select(1).arel.exists)
+                                         .and(Submitter.arel_table[:completed_at].eq(nil))
+                                         .and(Submitter.arel_table[:required].eq(true))).select(1).arel.exists)
   }
   scope :completed, lambda {
     where.not(Submitter.where(Submitter.arel_table[:submission_id].eq(Submission.arel_table[:id])
-     .and(Submitter.arel_table[:completed_at].eq(nil))).select(1).arel.exists)
+     .and(Submitter.arel_table[:completed_at].eq(nil))
+     .and(Submitter.arel_table[:required].eq(true))).select(1).arel.exists)
   }
   scope :declined, lambda {
     where(Submitter.where(Submitter.arel_table[:submission_id].eq(Submission.arel_table[:id])

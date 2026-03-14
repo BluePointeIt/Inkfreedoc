@@ -29,11 +29,18 @@
         {{ optionValue(option) }}
       </template>
       <template v-else>
+        <span
+          v-if="submitter.party_name"
+          class="opacity-70"
+        >{{ submitter.party_name }} · </span>
         <MarkdownContent
           v-if="field.title"
           :text-only="true"
           :string="field.title"
         />
+        <template v-else-if="field.description">
+          {{ field.description.substring(0, 60) }}{{ field.description.length > 60 ? '...' : '' }}
+        </template>
         <template v-else>
           {{ field.name || fieldNames[field.type] }}
         </template>

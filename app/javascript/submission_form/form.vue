@@ -111,6 +111,33 @@
       />
     </button>
     <div
+      v-if="allParties.length > 1 && !isCompleted"
+      class="text-center mb-2"
+    >
+      <select
+        class="select select-bordered select-sm text-xs font-medium max-w-xs"
+        :value="submitter.slug"
+        @change="switchParty($event.target.value)"
+      >
+        <option
+          v-for="party in allParties"
+          :key="party.slug"
+          :value="party.slug"
+          :disabled="party.completed"
+        >
+          {{ party.party_name || t('signer') }}{{ party.name ? ' — ' + party.name : '' }}{{ party.completed ? ' ✓' : '' }}{{ party.current ? ' ●' : '' }}
+        </option>
+      </select>
+    </div>
+    <div
+      v-else-if="submitter.party_name && !isCompleted"
+      class="text-center mb-2"
+    >
+      <span class="badge badge-neutral badge-sm text-xs font-medium">
+        {{ submitter.party_name }}{{ submitter.name ? ' — ' + submitter.name : '' }}
+      </span>
+    </div>
+    <div
       :class="{ 'md:px-4': isBreakpointMd }"
     >
       <form
@@ -168,7 +195,7 @@
           />
           <div v-else-if="currentField.type === 'select'">
             <label
-              v-if="showFieldNames && (currentField.name || currentField.title)"
+              v-if="showFieldNames && (currentField.name || currentField.title || currentField.description)"
               :for="currentField.uuid"
               dir="auto"
               class="label text-xl sm:text-2xl py-0 mb-2 sm:mb-3.5 field-name-label"
@@ -178,11 +205,11 @@
                 v-if="currentField.title"
                 :string="currentField.title"
               />
-              <template v-else>
+              <template v-else-if="currentField.name">
                 {{ currentField.name }}
               </template>
               <template v-if="!currentField.required">
-                <span :class="{ 'hidden sm:inline': (currentField.title || currentField.name).length > 20 }">
+                <span :class="{ 'hidden sm:inline': (currentField.title || currentField.name || '').length > 20 }">
                   ({{ t('optional') }})
                 </span>
               </template>
@@ -229,7 +256,7 @@
           </div>
           <div v-else-if="currentField.type === 'radio'">
             <label
-              v-if="showFieldNames && (currentField.name || currentField.title)"
+              v-if="showFieldNames && (currentField.name || currentField.title || currentField.description)"
               :for="currentField.uuid"
               dir="auto"
               class="label text-xl sm:text-2xl py-0 mb-2 sm:mb-3.5 field-name-label"
@@ -239,11 +266,11 @@
                 v-if="currentField.title"
                 :string="currentField.title"
               />
-              <template v-else>
+              <template v-else-if="currentField.name">
                 {{ currentField.name }}
               </template>
               <template v-if="!currentField.required">
-                <span :class="{ 'hidden sm:inline': (currentField.title || currentField.name).length > 20 }">
+                <span :class="{ 'hidden sm:inline': (currentField.title || currentField.name || '').length > 20 }">
                   ({{ t('optional') }})
                 </span>
               </template>
@@ -364,6 +391,12 @@
                         class="text-xl"
                       >
                         <MarkdownContent :string="field.title" />
+                      </span>
+                      <span
+                        v-else-if="field.description"
+                        class="text-xl"
+                      >
+                        <MarkdownContent :string="field.description" />
                       </span>
                       <span
                         v-else
@@ -907,6 +940,11 @@ export default {
       type: Object,
       required: false,
       default: () => ({})
+    },
+    allParties: {
+      type: Array,
+      required: false,
+      default: () => []
     }
   },
   data () {
@@ -1252,6 +1290,11 @@ export default {
   methods: {
     t (key) {
       return this.i18n[key] || i18n[this.language?.toLowerCase()]?.[key] || i18n[this.browserLanguage]?.[key] || i18n.en[key] || key
+    },
+    switchParty (slug) {
+      if (slug !== this.submitter.slug) {
+        window.location.href = this.baseUrl + '/s/' + slug
+      }
     },
     onOrientationChange (event) {
       this.orientation = event.target.type

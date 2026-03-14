@@ -68,6 +68,11 @@ class Submitter < ApplicationRecord
            class_name: 'SubmissionEvent', dependent: :destroy, inverse_of: :submitter
 
   scope :completed, -> { where.not(completed_at: nil) }
+  scope :required, -> { where(required: true) }
+
+  def required?
+    required
+  end
 
   after_destroy :anonymize_email_events, if: -> { Docuseal.multitenant? }
 

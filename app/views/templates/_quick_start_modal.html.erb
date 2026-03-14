@@ -1,0 +1,22 @@
+<%= render 'shared/turbo_modal', title: t('new_signing') do %>
+  <div class="px-5 mb-5 mt-4">
+    <%= form_for '', url: template_quick_start_index_path(template), method: :post, html: { class: 'space-y-4' }, data: { turbo: false } do |f| %>
+      <div class="form-control">
+        <label class="label pb-1">
+          <span class="label-text font-semibold"><%= t('resident_name') %></span>
+        </label>
+        <input type="text" name="name" class="base-input w-full" placeholder="<%= t('enter_resident_name') %>" required autofocus dir="auto">
+      </div>
+      <div class="form-control">
+        <label class="label pb-1">
+          <span class="label-text font-semibold"><%= t('email') %> <span class="text-base-content/50">(<%= t('optional').downcase %>)</span></span>
+        </label>
+        <input type="email" name="email" class="base-input w-full" placeholder="<%= t('email') %>" dir="auto">
+      </div>
+      <button type="submit" class="base-button w-full">
+        <%= svg_icon('writing', class: 'w-6 h-6') %>
+        <span><%= t('start_signing') %></span>
+      </button>
+    <% end %>
+  </div>
+<% end %>

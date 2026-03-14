@@ -19,6 +19,6 @@ class SubmissionsDashboardController < ApplicationController
                      @submissions.order(id: :desc)
                    end
 
-    @pagy, @submissions = pagy_auto(@submissions.preload(:envelope, submitters: :start_form_submission_events))
+    @pagy, @submissions = pagy_auto(@submissions.preload(:envelope, :audit_trail_attachment, submitters: :start_form_submission_events))
   end
 end

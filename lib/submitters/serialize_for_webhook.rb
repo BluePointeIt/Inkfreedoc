@@ -95,7 +95,7 @@ module Submitters
     def build_submission_status(submission)
       submitters = submission.submitters
 
-      if submitters.all?(&:completed_at?)
+      if submitters.select(&:required?).all?(&:completed_at?)
         'completed'
       elsif submitters.any?(&:declined_at?)
         'declined'

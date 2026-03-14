@@ -15,7 +15,7 @@ class Envelope < ApplicationRecord
   def update_status!
     return if completed_at.present?
 
-    all_completed = submitters.where(completed_at: nil).none?
+    all_completed = submitters.where(required: true, completed_at: nil).none?
 
     update!(completed_at: Time.current) if all_completed
   end

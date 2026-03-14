@@ -1,5 +1,5 @@
 <div class="h-44 relative group">
-  <a href="<%= edit_template_path(template) %>" class="flex h-full flex-col justify-between rounded-2xl pt-6 px-7 w-full bg-base-200 before:border-2 before:border-base-300 before:border-dashed before:absolute before:left-0 before:right-0 before:top-0 before:bottom-0 before:hidden before:rounded-2xl" data-targets="dashboard-dropzone.templateCards">
+  <a href="<%= template.archived_at? ? edit_template_path(template) : new_template_quick_start_path(template) %>" class="flex h-full flex-col justify-between rounded-2xl pt-6 px-7 w-full bg-base-200 before:border-2 before:border-base-300 before:border-dashed before:absolute before:left-0 before:right-0 before:top-0 before:bottom-0 before:hidden before:rounded-2xl" data-targets="dashboard-dropzone.templateCards" data-turbo-frame="modal">
     <div class="text-xl font-semibold" style="line-height: 1.6rem; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;">
       <% if template.template_accesses.present? %>
         <%= svg_icon('lock', class: 'w-6 h-6 inline -translate-y-[4px]') %>
@@ -30,9 +30,16 @@
   </a>
   <div class="absolute top-0 bottom-0 w-0 items-center hidden md:group-hover:flex" style="right: 37px" data-targets="dashboard-dropzone.hiddenOnDrag">
     <div class="space-y-1">
+      <% if can?(:update, template) && !template.archived_at? && template.account_id == current_account.id %>
+        <span class="tooltip tooltip-left" data-tip="<%= t('edit') %>">
+          <a href="<%= edit_template_path(template) %>" class="btn btn-xs btn-primary btn-circle">
+            <%= svg_icon('pencil', class: 'w-4 h-4') %>
+          </a>
+        </span>
+      <% end %>
       <% if !template.archived_at? && can?(:create, Submission) %>
         <span class="tooltip tooltip-left" data-tip="<%= t('add_recipients') %>">
-          <a href="<%= new_template_submission_path(template) %>" data-turbo-frame="modal" class="btn btn-xs btn-primary btn-circle">
+          <a href="<%= new_template_submission_path(template) %>" data-turbo-frame="modal" class="btn btn-xs hover:btn-outline bg-base-200 btn-circle">
             <%= svg_icon('mail_forward', class: 'w-4 h-4') %>
           </a>
         </span>

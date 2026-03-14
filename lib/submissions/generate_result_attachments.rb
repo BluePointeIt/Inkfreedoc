@@ -933,7 +933,7 @@ module Submissions
 
       return sign_reason(reason_name) if config.value == 'multiple'
 
-      if !submitter.submission.submitters.exists?(completed_at: nil) &&
+      if !submitter.submission.submitters.where(required: true).exists?(completed_at: nil) &&
          submitter.completed_at == submitter.submission.submitters.maximum(:completed_at)
         return single_sign_reason(submitter)
       end

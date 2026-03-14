@@ -18,6 +18,6 @@ class SubmissionsArchivedController < ApplicationController
                      @submissions.order(id: :desc)
                    end
 
-    @pagy, @submissions = pagy_auto(@submissions.preload(submitters: :start_form_submission_events))
+    @pagy, @submissions = pagy_auto(@submissions.preload(:audit_trail_attachment, submitters: :start_form_submission_events))
   end
 end

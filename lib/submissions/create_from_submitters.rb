@@ -320,6 +320,13 @@ module Submissions
 
       phone_field_uuid = find_phone_field(submission, values)&.dig('uuid')
 
+      template_sub = submission.template_submitters.find { |ts| ts['uuid'] == uuid }
+      is_required = if attrs.key?(:required)
+                      attrs[:required] != false && attrs[:required] != 'false'
+                    else
+                      template_sub&.dig('required') != false
+                    end
+
       submitter =
         submission.submitters.new(
           email:,
@@ -333,7 +340,8 @@ module Submissions
           preferences: preferences.merge(submitter_preferences)
                                   .merge({ default_values: attrs[:values] }.compact_blank)
                                   .except('bcc_completed'),
-          uuid:
+          uuid:,
+          required: is_required
         )
 
       submitter.sent_at =

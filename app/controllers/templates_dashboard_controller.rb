@@ -85,6 +85,7 @@ class TemplatesDashboardController < ApplicationController
                                      .where(archived_at: nil)
                                      .where(templates: { archived_at: nil })
                                      .preload(:envelope, :template_accesses, :created_by_user,
+                                              :audit_trail_attachment,
                                               template: :author,
                                               submitters: :start_form_submission_events)
 

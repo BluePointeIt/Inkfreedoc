@@ -75,6 +75,7 @@ class TemplateFoldersController < ApplicationController
                                                    .where(folder: [@template_folder, *@template_folder.subfolders])
                                                    .select(:id))
                 .preload(:template_accesses, :created_by_user,
+                         :audit_trail_attachment,
                          template: :author,
                          submitters: :start_form_submission_events)
 

@@ -59,13 +59,28 @@
                   {{ submitter.name }}
                 </span>
               </span>
-              <button
-                v-if="submitters.length > 1 && editable"
-                class="px-2"
-                @click.prevent.stop="remove(submitter)"
-              >
-                <IconTrashX :width="18" />
-              </button>
+              <span class="flex items-center space-x-1">
+                <label
+                  v-if="editable"
+                  class="flex items-center space-x-1 text-xs px-1"
+                  @click.stop
+                >
+                  <input
+                    type="checkbox"
+                    :checked="submitter.required !== false"
+                    class="checkbox checkbox-xs"
+                    @change="toggleRequired(submitter, $event)"
+                  >
+                  <span>{{ t('required') }}</span>
+                </label>
+                <button
+                  v-if="submitters.length > 1 && editable"
+                  class="px-2"
+                  @click.prevent.stop="remove(submitter)"
+                >
+                  <IconTrashX :width="18" />
+                </button>
+              </span>
             </a>
           </li>
           <li v-if="submitters.length < names.length && editable">
@@ -159,7 +174,26 @@
             <span>
               {{ submitter.name }}
             </span>
+            <span
+              v-if="submitter.required === false && !editable"
+              class="text-xs opacity-60 ml-1"
+            >({{ t('optional') }})</span>
           </span>
+          <div class="flex items-center">
+            <label
+              v-if="editable"
+              class="flex items-center space-x-1 text-xs px-1"
+              @click.stop
+            >
+              <input
+                type="checkbox"
+                :checked="submitter.required !== false"
+                class="checkbox checkbox-xs"
+                @change="toggleRequired(submitter, $event)"
+              >
+              <span>{{ t('required') }}</span>
+            </label>
+          </div>
           <div
             v-if="!compact && submitters.length > 1 && editable"
             class="flex"
@@ -371,10 +405,15 @@ export default {
 
       this.save()
     },
+    toggleRequired (submitter, event) {
+      submitter.required = event.target.checked
+      this.save()
+    },
     addSubmitter () {
       const newSubmitter = {
         name: this.names[this.lastPartyIndex],
-        uuid: v4()
+        uuid: v4(),
+        required: true
       }
 
       this.submitters.push(newSubmitter)

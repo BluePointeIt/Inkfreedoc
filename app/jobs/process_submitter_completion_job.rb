@@ -8,11 +8,13 @@ class ProcessSubmitterCompletionJob
 
     create_completed_submitter!(submitter)
 
-    is_all_completed = !submitter.submission.submitters.exists?(completed_at: nil)
+    is_all_completed = !submitter.submission.submitters.where(required: true).exists?(completed_at: nil)
+    already_was_completed = submitter.submission.audit_trail.attached?
 
     Submissions::EnsureResultGenerated.call(submitter)
 
-    if is_all_completed && submitter.completed_at == submitter.submission.submitters.maximum(:completed_at)
+    if is_all_completed && !already_was_completed &&
+       submitter.completed_at == submitter.submission.submitters.where(required: true).maximum(:completed_at)
       Submissions::EnsureCombinedGenerated.call(submitter)
 
       Submissions::EnsureAuditGenerated.call(submitter.submission)
@@ -23,13 +25,15 @@ class ProcessSubmitterCompletionJob
     create_completed_documents!(submitter)
 
     # Record document hashes for audit integrity chain
-    record_document_hashes!(submitter, is_all_completed)
+    record_document_hashes!(submitter, is_all_completed && !already_was_completed)
 
-    if !is_all_completed && submitter.submission.submitters_order_preserved? && params['send_invitation_email'] != false
+    has_pending_submitters = submitter.submission.submitters.exists?(completed_at: nil)
+
+    if has_pending_submitters && submitter.submission.submitters_order_preserved? && params['send_invitation_email'] != false
       enqueue_next_submitter_request_notification(submitter)
     end
 
-    enqueue_completed_webhooks(submitter, is_all_completed:)
+    enqueue_completed_webhooks(submitter, is_all_completed: is_all_completed && !already_was_completed)
 
     submitter.submission.envelope&.update_status!
   end
@@ -211,7 +215,7 @@ class ProcessSubmitterCompletionJob
 
         if current_group_index && submitter_groups[current_group_index + 1] &&
            submitters_index.values_at(*submitter_groups[current_group_index].pluck('uuid'))
-                           .compact.all?(&:completed_at?)
+                           .compact.select(&:required?).all?(&:completed_at?)
           submitter_groups[current_group_index + 1]
         end
       else

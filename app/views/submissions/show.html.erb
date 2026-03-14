@@ -15,7 +15,7 @@
     </a>
     <div class="space-x-3 flex items-center">
       <% last_submitter = @submission.submitters.to_a.select(&:completed_at?).max_by(&:completed_at) %>
-      <% is_all_completed = @submission.submitters.to_a.all?(&:completed_at?) %>
+      <% is_all_completed = @submission.submitters.to_a.select(&:required?).all?(&:completed_at?) %>
       <% if signed_in? && can?(:create, @submission) && @submission.archived_at? && !is_all_completed %>
         <%= button_to button_title(title: t('unarchive'), disabled_with: t('unarchive')[0..-2], icon: svg_icon('rotate', class: 'w-6 h-6')), submission_unarchive_index_path(@submission), class: 'btn btn-primary btn-ghost text-base hidden md:flex' %>
       <% end %>
@@ -314,6 +314,7 @@
     </label>
   </toggle-visible>
 </div>
+<page-navigation></page-navigation>
 <% unless request.headers['HTTP_X_TURBO'] %>
   <%= render 'scripts/autosize_field' %>
 <% end %>

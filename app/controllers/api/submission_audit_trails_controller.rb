@@ -81,7 +81,7 @@ module Api
     end
 
     def submission_status(submission)
-      if submission.submitters.all?(&:completed_at?)
+      if submission.submitters.select(&:required?).all?(&:completed_at?)
         'completed'
       elsif submission.submitters.any?(&:declined_at?)
         'declined'

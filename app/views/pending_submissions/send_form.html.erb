@@ -1,0 +1,55 @@
+<%= render 'shared/turbo_modal', title: t('send_email') do %>
+  <div class="px-5 mb-5 mt-4">
+    <div class="mb-4 p-3 bg-base-300/40 rounded-lg">
+      <div class="flex items-center gap-2 text-sm text-base-content/70">
+        <%= svg_icon('file_text', class: 'w-4 h-4') %>
+        <span class="font-medium"><%= @submission.template&.name %></span>
+      </div>
+    </div>
+    <%= form_tag send_signing_pending_submissions_path, method: :post, class: 'space-y-4' do %>
+      <%= hidden_field_tag :id, @submission.id %>
+      <% @submitters.each_with_index do |submitter, index| %>
+        <% party_name = @template_submitters.find { |ts| ts['uuid'] == submitter.uuid }&.dig('name') %>
+        <div class="form-control">
+          <div class="flex items-center justify-between pb-1">
+            <span class="label-text font-semibold">
+              <span class="badge badge-sm badge-neutral mr-1"><%= index + 1 %></span>
+              <%= party_name || submitter.name || "#{t('party')} #{index + 1}" %>
+            </span>
+            <% if submitter.completed_at? %>
+              <span class="label-text-alt text-success"><%= t('completed') %></span>
+            <% else %>
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-base-content/60" id="tl<%= submitter.id %>"><%= t('include_in_send') %></span>
+                <input type="checkbox"
+                       class="toggle toggle-sm toggle-accent"
+                       checked="checked"
+                       style="width: 38px; --handleoffset: 17px"
+                       onchange="document.getElementById('st<%= submitter.id %>').value=this.checked?'1':'0';document.getElementById('em<%= submitter.id %>').disabled=!this.checked;document.getElementById('em<%= submitter.id %>').className=this.checked?'base-input w-full':'base-input w-full opacity-40';document.getElementById('tl<%= submitter.id %>').innerText=this.checked?'Include':'Exclude';">
+                <input type="hidden" name="send_to[<%= submitter.id %>]" id="st<%= submitter.id %>" value="1">
+              </div>
+            <% end %>
+          </div>
+          <input type="email"
+                 name="submitter_emails[<%= submitter.id %>]"
+                 value="<%= submitter.email %>"
+                 class="base-input w-full"
+                 placeholder="<%= t('email') %>"
+                 dir="auto"
+                 id="em<%= submitter.id %>"
+                 <%= 'disabled' if submitter.completed_at? %>>
+        </div>
+      <% end %>
+      <% if @submitters.size > 1 %>
+        <div class="text-xs text-base-content/50 flex items-center gap-1">
+          <%= svg_icon('info_circle', class: 'w-4 h-4') %>
+          <span><%= t('parties_will_sign_in_order') %></span>
+        </div>
+      <% end %>
+      <button type="submit" class="base-button w-full gap-1">
+        <%= svg_icon('send', class: 'w-5 h-5') %>
+        <span><%= t('send_email') %></span>
+      </button>
+    <% end %>
+  </div>
+<% end %>

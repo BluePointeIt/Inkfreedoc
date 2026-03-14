@@ -20,9 +20,7 @@ class DashboardController < ApplicationController
   private
 
   def maybe_redirect_product_url
-    return if !Docuseal.multitenant? || signed_in?
-
-    redirect_to Docuseal::PRODUCT_URL, allow_other_host: true
+    # Skip redirect — show InkFreeDoc landing page instead of external docuseal.com
   end
 
   def maybe_redirect_mfa_setup
